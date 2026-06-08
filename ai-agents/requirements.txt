@@ -1,0 +1,21 @@
+# MediAgent AI — Python Agent Service Dependencies
+# All packages ship pre-built Windows wheels — no Rust or C compiler needed.
+
+# Web framework
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+pydantic>=2.7.4,<3.0.0
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+
+# LangGraph 1.x (pre-built wheels, stable API)
+langgraph>=1.0.0,<2.0.0
+
+# LangChain Google Gemini (must be compatible with langchain-core>=1.4.0 pulled by langgraph 1.x)
+langchain-google-genai>=2.1.0,<3.0.0
+
+# HTTP client
+httpx>=0.27.0,<1.0.0
+
+# JWT
+python-jose[cryptography]>=3.3.0,<4.0.0

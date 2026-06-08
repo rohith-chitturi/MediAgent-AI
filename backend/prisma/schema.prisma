@@ -1,0 +1,453 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── MULTI-TENANT CORE ────────────────────────────────────────
+
+model Hospital {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  phone     String
+  email     String
+  logoUrl   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users         User[]
+  departments   Department[]
+  beds          Bed[]
+  resources     Resource[]
+  agentActions  AgentAction[]
+  agentMemories AgentMemory[]
+  notifications Notification[]
+  agentRuns     AgentRun[]
+
+  @@map("hospitals")
+}
+
+model Role {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  permissions Permission[]
+  users       User[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id     String @id @default(cuid())
+  action String
+  roles  Role[]
+
+  @@map("permissions")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  hospitalId   String
+  roleId       String
+  name         String
+  email        String   @unique
+  passwordHash String
+  phone        String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  hospital      Hospital       @relation(fields: [hospitalId], references: [id])
+  role          Role           @relation(fields: [roleId], references: [id])
+  doctor        Doctor?
+  notifications Notification[]
+  auditLogs     AuditLog[]
+
+  @@index([hospitalId])
+  @@index([email])
+  @@map("users")
+}
+
+// ─── MEDICAL STAFF ────────────────────────────────────────────
+
+model Department {
+  id         String   @id @default(cuid())
+  hospitalId String
+  name       String
+  createdAt  DateTime @default(now())
+
+  hospital Hospital @relation(fields: [hospitalId], references: [id])
+  doctors  Doctor[]
+
+  @@index([hospitalId])
+  @@map("departments")
+}
+
+model Doctor {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  departmentId   String
+  specialization String
+  isAvailable    Boolean  @default(true)
+  maxWorkload    Int      @default(10)
+  currentLoad    Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id])
+  department   Department    @relation(fields: [departmentId], references: [id])
+  appointments Appointment[]
+  patients     Patient[]
+
+  @@index([departmentId])
+  @@map("doctors")
+}
+
+// ─── PATIENTS ─────────────────────────────────────────────────
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum PatientStatus {
+  WAITING
+  TRIAGED
+  ADMITTED
+  DISCHARGED
+}
+
+model Patient {
+  id               String        @id @default(cuid())
+  hospitalId       String
+  name             String
+  age              Int
+  gender           String
+  phone            String
+  emergencyContact String?
+  symptoms         String
+  triageNotes      String?
+  priority         Priority?
+  status           PatientStatus @default(WAITING)
+  doctorId         String?
+  isDeleted        Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  doctor         Doctor?         @relation(fields: [doctorId], references: [id])
+  bedAssignment  BedAssignment?
+  appointments   Appointment[]
+  resourceUsages ResourceUsage[]
+  callLogs       CallLog[]
+
+  @@index([hospitalId])
+  @@index([hospitalId, status])
+  @@index([hospitalId, priority])
+  @@map("patients")
+}
+
+// ─── BEDS ─────────────────────────────────────────────────────
+
+enum BedType {
+  ICU
+  EMERGENCY
+  GENERAL
+}
+
+enum BedStatus {
+  AVAILABLE
+  OCCUPIED
+  MAINTENANCE
+}
+
+model Bed {
+  id         String    @id @default(cuid())
+  hospitalId String
+  type       BedType
+  number     String
+  ward       String
+  floor      String?
+  status     BedStatus @default(AVAILABLE)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  hospital   Hospital       @relation(fields: [hospitalId], references: [id])
+  assignment BedAssignment?
+
+  @@unique([hospitalId, number])
+  @@index([hospitalId, status])
+  @@index([hospitalId, type])
+  @@map("beds")
+}
+
+model BedAssignment {
+  id         String    @id @default(cuid())
+  bedId      String    @unique
+  patientId  String    @unique
+  assignedBy String
+  assignedAt DateTime  @default(now())
+  releasedAt DateTime?
+
+  bed     Bed     @relation(fields: [bedId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id])
+
+  @@map("bed_assignments")
+}
+
+// ─── RESOURCES ────────────────────────────────────────────────
+
+enum ResourceType {
+  MEDICINE
+  OXYGEN
+  VENTILATOR
+  EQUIPMENT
+  BLOOD
+}
+
+model Resource {
+  id         String       @id @default(cuid())
+  hospitalId String
+  name       String
+  type       ResourceType
+  quantity   Int
+  threshold  Int
+  unit       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  hospital Hospital        @relation(fields: [hospitalId], references: [id])
+  usage    ResourceUsage[]
+
+  @@index([hospitalId])
+  @@map("resources")
+}
+
+model ResourceUsage {
+  id           String   @id @default(cuid())
+  resourceId   String
+  patientId    String?
+  quantityUsed Int
+  notes        String?
+  usedAt       DateTime @default(now())
+
+  resource Resource @relation(fields: [resourceId], references: [id])
+  patient  Patient? @relation(fields: [patientId], references: [id])
+
+  @@map("resource_usage")
+}
+
+// ─── APPOINTMENTS ─────────────────────────────────────────────
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  patientId   String
+  doctorId    String
+  scheduledAt DateTime
+  status      AppointmentStatus @default(SCHEDULED)
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id])
+  doctor  Doctor  @relation(fields: [doctorId], references: [id])
+
+  @@index([doctorId])
+  @@index([patientId])
+  @@map("appointments")
+}
+
+// ─── AGENT ACTIVITY ───────────────────────────────────────────
+
+enum ConfidenceLevel {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum WorkflowStatus {
+  RUNNING
+  COMPLETED
+  FAILED
+  PARTIAL
+}
+
+// AgentRun — tracks an entire multi-agent workflow execution.
+// UUID is the true PK; displayRunId (e.g. RUN-2026-0001) is human-facing.
+model AgentRun {
+  id             String         @id @default(uuid())
+  displayRunId   String         // e.g. "RUN-2026-0001"
+  hospitalId     String
+  patientId      String?
+  workflowStatus WorkflowStatus @default(RUNNING)
+  startedAt      DateTime       @default(now())
+  completedAt    DateTime?
+  durationMs     Int?
+
+  hospital Hospital      @relation(fields: [hospitalId], references: [id])
+  actions  AgentAction[]
+
+  @@index([hospitalId, workflowStatus])
+  @@index([hospitalId, startedAt(sort: Desc)])
+  @@index([displayRunId])
+  @@map("agent_runs")
+}
+
+model AgentAction {
+  id                String           @id @default(cuid())
+  hospitalId        String
+  agentRunId        String?          // FK → AgentRun.id (UUID)
+  displayRunId      String?          // denormalised display ID for easy queries
+  agentName         String
+  actionType        String
+  targetType        String?
+  targetId          String?
+  payload           Json             @default("{}")
+  decisionSummary   String?
+  confidenceLevel   ConfidenceLevel?
+  recommendedAction String?
+  status            String           @default("PENDING")
+  durationMs        Int?
+  createdAt         DateTime         @default(now())
+
+  hospital Hospital   @relation(fields: [hospitalId], references: [id])
+  agentRun AgentRun?  @relation(fields: [agentRunId], references: [id])
+
+  @@index([hospitalId, agentName])
+  @@index([hospitalId, createdAt(sort: Desc)])
+  @@index([hospitalId, status])
+  @@index([agentRunId])
+  @@index([displayRunId])
+  @@map("agent_actions")
+}
+
+// ─── AGENT MEMORY (Future-ready — schema scaffolded) ──────────
+
+model AgentMemory {
+  id         String    @id @default(cuid())
+  hospitalId String
+  agentName  String
+  memoryType String
+  key        String
+  value      Json
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  hospital Hospital @relation(fields: [hospitalId], references: [id])
+
+  @@unique([hospitalId, agentName, key])
+  @@index([hospitalId, agentName, memoryType])
+  @@map("agent_memories")
+}
+
+// ─── VOICE CALLS ──────────────────────────────────────────────
+
+enum CallType {
+  APPOINTMENT_REMINDER
+  FOLLOW_UP
+  EMERGENCY_ALERT
+  DUTY_REQUEST
+  SUPPLIER_ALERT
+  CRITICAL_ALERT
+  DISCHARGE_NOTICE
+}
+
+enum CallStatus {
+  INITIATED
+  RINGING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  NO_ANSWER
+}
+
+model CallLog {
+  id            String     @id @default(cuid())
+  patientId     String?
+  callType      CallType
+  calledTo      String
+  recipientName String
+  recipientRole String
+  status        CallStatus @default(INITIATED)
+  vapiCallId    String?    @unique
+  duration      Int?
+  transcript    String?
+  recordingUrl  String?
+  initiatedAt   DateTime   @default(now())
+  endedAt       DateTime?
+
+  patient Patient? @relation(fields: [patientId], references: [id])
+
+  @@index([patientId])
+  @@map("call_logs")
+}
+
+// ─── NOTIFICATIONS ────────────────────────────────────────────
+
+enum NotificationChannel {
+  DASHBOARD
+  EMAIL
+  SMS
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  CRITICAL
+  SUCCESS
+}
+
+model Notification {
+  id         String              @id @default(cuid())
+  hospitalId String
+  userId     String?
+  title      String
+  message    String
+  type       NotificationType
+  channel    NotificationChannel @default(DASHBOARD)
+  isRead     Boolean             @default(false)
+  metadata   Json?
+  createdAt  DateTime            @default(now())
+
+  hospital Hospital @relation(fields: [hospitalId], references: [id])
+  user     User?    @relation(fields: [userId], references: [id])
+
+  @@index([hospitalId, isRead])
+  @@index([userId, isRead])
+  @@map("notifications")
+}
+
+// ─── AUDIT LOG ────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  entity    String
+  entityId  String
+  before    Json?
+  after     Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("audit_logs")
+}
