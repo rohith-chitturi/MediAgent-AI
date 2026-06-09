@@ -1,10 +1,10 @@
 const { Router } = require('express');
 const { authenticate } = require('../../middleware/auth.middleware');
-const { scopeToHospital } = require('../../middleware/rbac.middleware');
+const { scopeToHospital, requirePermission } = require('../../middleware/rbac.middleware');
 const ctrl = require('./beds.controller');
 
 const router = Router();
-router.use(authenticate, scopeToHospital);
+router.use(authenticate, scopeToHospital, requirePermission('BED_MANAGE'));
 
 router.get('/',            ctrl.list);
 router.get('/summary',     ctrl.getSummary);

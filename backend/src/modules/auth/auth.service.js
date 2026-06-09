@@ -11,6 +11,7 @@ const generateTokens = (user) => {
     userId: user.id,
     email: user.email,
     role: user.role.name,
+    permissions: user.role.permissions?.map(p => p.action) || [],
     hospitalId: user.hospitalId,
   };
 
@@ -34,7 +35,7 @@ const login = async (email, password) => {
   const user = await prisma.user.findUnique({
     where: { email: email.toLowerCase() },
     include: {
-      role: true,
+      role: { include: { permissions: true } },
       hospital: { select: { id: true, name: true, logoUrl: true } },
       doctor: { select: { id: true, specialization: true } },
     },
@@ -59,6 +60,7 @@ const login = async (email, password) => {
       name: user.name,
       email: user.email,
       role: user.role.name,
+      permissions: user.role.permissions?.map(p => p.action) || [],
       hospital: user.hospital,
       doctor: user.doctor,
     },
@@ -78,7 +80,7 @@ const refreshTokens = async (refreshToken) => {
 
   const user = await prisma.user.findUnique({
     where: { id: decoded.userId },
-    include: { role: true },
+    include: { role: { include: { permissions: true } } },
   });
 
   if (!user || !user.isActive) {
@@ -101,7 +103,7 @@ const getMe = async (userId) => {
       phone: true,
       isActive: true,
       createdAt: true,
-      role: { select: { id: true, name: true } },
+      role: { select: { id: true, name: true, permissions: { select: { action: true } } } },
       hospital: { select: { id: true, name: true, logoUrl: true } },
       doctor: {
         select: {

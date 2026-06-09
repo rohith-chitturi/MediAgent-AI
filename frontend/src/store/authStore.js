@@ -19,6 +19,18 @@ const useAuthStore = create(
 
       getUser: () => get().user,
       getToken: () => get().accessToken,
+      
+      hasPermission: (permission) => {
+        const user = get().user;
+        if (!user) return false;
+        if (user.role === 'SUPER_ADMIN') return true;
+        return user.permissions?.includes(permission) || false;
+      },
+      
+      hasRole: (role) => {
+        const user = get().user;
+        return user?.role === role;
+      },
     }),
     {
       name: 'mediagent-auth',

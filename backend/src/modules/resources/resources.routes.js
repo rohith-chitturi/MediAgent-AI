@@ -1,10 +1,10 @@
 const { Router } = require('express');
 const { authenticate } = require('../../middleware/auth.middleware');
-const { scopeToHospital } = require('../../middleware/rbac.middleware');
+const { scopeToHospital, requirePermission } = require('../../middleware/rbac.middleware');
 const ctrl = require('./resources.controller');
 
 const router = Router();
-router.use(authenticate, scopeToHospital);
+router.use(authenticate, scopeToHospital, requirePermission('RESOURCE_MANAGE'));
 
 router.get('/',                  ctrl.list);
 router.get('/low-stock',         ctrl.getLowStock);

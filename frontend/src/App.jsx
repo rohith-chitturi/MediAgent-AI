@@ -5,13 +5,18 @@ import useAuthStore from './store/authStore';
 
 // Pages
 import Login          from './pages/auth/Login';
-import Dashboard      from './pages/dashboard/Dashboard';
 import Patients       from './pages/patients/Patients';
 import Doctors        from './pages/doctors/Doctors';
 import Beds           from './pages/beds/Beds';
 import Resources      from './pages/resources/Resources';
 import Appointments   from './pages/appointments/Appointments';
 import PlaceholderPage from './pages/PlaceholderPage';
+
+// Dashboards
+import HospitalAdminDashboard from './pages/dashboard/HospitalAdminDashboard';
+import SuperAdminDashboard from './pages/dashboard/SuperAdminDashboard';
+import DoctorDashboard from './pages/dashboard/DoctorDashboard';
+import ReceptionDashboard from './pages/dashboard/ReceptionDashboard';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,9 +25,34 @@ const queryClient = new QueryClient({
 });
 
 // Protected route wrapper
-function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuthStore();
-  return isAuthenticated ? children : <Navigate to="/login" replace />;
+function ProtectedRoute({ children, permission }) {
+  const { isAuthenticated, hasPermission, user } = useAuthStore();
+  
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  
+  if (permission && !hasPermission(permission) && user?.role !== 'SUPER_ADMIN') {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return children;
+}
+
+// Role Router for Dashboard
+function RoleRouter() {
+  const { user } = useAuthStore();
+  
+  switch (user?.role) {
+    case 'SUPER_ADMIN':
+      return <SuperAdminDashboard />;
+    case 'HOSPITAL_ADMIN':
+      return <HospitalAdminDashboard />;
+    case 'DOCTOR':
+      return <DoctorDashboard />;
+    case 'RECEPTIONIST':
+      return <ReceptionDashboard />;
+    default:
+      return <HospitalAdminDashboard />;
+  }
 }
 
 // Public route — redirect to dashboard if already logged in
@@ -41,32 +71,32 @@ export default function App() {
             <PublicRoute><Login /></PublicRoute>
           } />
 
-          {/* Protected */}
+          {/* Protected Dashboard */}
           <Route path="/dashboard" element={
-            <ProtectedRoute><Dashboard /></ProtectedRoute>
+            <ProtectedRoute><RoleRouter /></ProtectedRoute>
           } />
           <Route path="/patients" element={
-            <ProtectedRoute><Patients /></ProtectedRoute>
+            <ProtectedRoute permission="PATIENT_VIEW_QUEUE"><Patients /></ProtectedRoute>
           } />
           <Route path="/doctors" element={
-            <ProtectedRoute><Doctors /></ProtectedRoute>
+            <ProtectedRoute permission="PATIENT_VIEW_QUEUE"><Doctors /></ProtectedRoute>
           } />
           <Route path="/beds" element={
-            <ProtectedRoute><Beds /></ProtectedRoute>
+            <ProtectedRoute permission="BED_MANAGE"><Beds /></ProtectedRoute>
           } />
           <Route path="/resources" element={
-            <ProtectedRoute><Resources /></ProtectedRoute>
+            <ProtectedRoute permission="RESOURCE_MANAGE"><Resources /></ProtectedRoute>
           } />
           <Route path="/appointments" element={
-            <ProtectedRoute><Appointments /></ProtectedRoute>
+            <ProtectedRoute permission="PATIENT_VIEW_QUEUE"><Appointments /></ProtectedRoute>
           } />
           <Route path="/agent-activity" element={
-            <ProtectedRoute>
+            <ProtectedRoute permission="AGENT_VIEW">
               <PlaceholderPage title="Agent Activity" subtitle="AI agent decision timeline" icon={BrainCircuit} />
             </ProtectedRoute>
           } />
           <Route path="/call-logs" element={
-            <ProtectedRoute>
+            <ProtectedRoute permission="AGENT_VIEW">
               <PlaceholderPage title="Call Logs" subtitle="Vapi voice call history" icon={PhoneCall} />
             </ProtectedRoute>
           } />

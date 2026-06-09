@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Bed, Lock, Unlock, Loader2, AlertTriangle, X } from 'lucide-react';
+import { Bed, Unlock, Loader2, AlertTriangle, X } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import { bedsApi } from '../../services/modules';
 
@@ -64,6 +64,23 @@ function BedCard({ bed, onRelease, isReleasing }) {
   );
 }
 
+const SummaryCard = ({ label, value, color }) => (
+  <div className="stat-card" style={{ padding: '1rem', borderTop: `2px solid ${color}40` }}>
+    <p style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>{label}</p>
+    <p style={{ fontSize: '1.8rem', fontWeight: 800, color }}>{value ?? '—'}</p>
+  </div>
+);
+
+const FilterBtn = ({ active, onClick, children }) => (
+  <button onClick={onClick} style={{
+    background: active ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-3)',
+    border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : 'var(--color-border)'}`,
+    borderRadius: '7px', color: active ? '#93c5fd' : 'var(--color-text-secondary)',
+    cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, padding: '0.4rem 0.875rem',
+    transition: 'all 0.15s', fontFamily: 'inherit',
+  }}>{children}</button>
+);
+
 export default function Beds() {
   const qc = useQueryClient();
   const [typeFilter, setTypeFilter]     = useState('');
@@ -95,23 +112,6 @@ export default function Beds() {
   });
 
   const beds = data?.data ?? [];
-
-  const SummaryCard = ({ label, value, color }) => (
-    <div className="stat-card" style={{ padding: '1rem', borderTop: `2px solid ${color}40` }}>
-      <p style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.5rem' }}>{label}</p>
-      <p style={{ fontSize: '1.8rem', fontWeight: 800, color }}>{value ?? '—'}</p>
-    </div>
-  );
-
-  const FilterBtn = ({ active, onClick, children }) => (
-    <button onClick={onClick} style={{
-      background: active ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-3)',
-      border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : 'var(--color-border)'}`,
-      borderRadius: '7px', color: active ? '#93c5fd' : 'var(--color-text-secondary)',
-      cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, padding: '0.4rem 0.875rem',
-      transition: 'all 0.15s', fontFamily: 'inherit',
-    }}>{children}</button>
-  );
 
   return (
     <Layout title="Beds" subtitle="Bed occupancy management & allocation">

@@ -81,6 +81,16 @@ function RestockModal({ resource, onClose }) {
   );
 }
 
+const FilterBtn = ({ active, onClick, children }) => (
+  <button onClick={onClick} style={{
+    background: active ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-3)',
+    border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : 'var(--color-border)'}`,
+    borderRadius: '7px', color: active ? '#93c5fd' : 'var(--color-text-secondary)',
+    cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, padding: '0.4rem 0.875rem',
+    transition: 'all 0.15s', fontFamily: 'inherit',
+  }}>{children}</button>
+);
+
 export default function Resources() {
   const [typeFilter, setTypeFilter] = useState('');
   const [lowOnly, setLowOnly]       = useState(false);
@@ -94,16 +104,6 @@ export default function Resources() {
 
   const resources = data?.data ?? [];
   const lowCount  = resources.filter((r) => r.isLow).length;
-
-  const FilterBtn = ({ active, onClick, children }) => (
-    <button onClick={onClick} style={{
-      background: active ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-3)',
-      border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : 'var(--color-border)'}`,
-      borderRadius: '7px', color: active ? '#93c5fd' : 'var(--color-text-secondary)',
-      cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, padding: '0.4rem 0.875rem',
-      transition: 'all 0.15s', fontFamily: 'inherit',
-    }}>{children}</button>
-  );
 
   return (
     <Layout title="Resources" subtitle="Medical resource inventory & alerts">

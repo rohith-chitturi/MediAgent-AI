@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserPlus, Search, Filter, AlertTriangle, ChevronRight, X, Loader2, RefreshCw } from 'lucide-react';
+import { UserPlus, Search, AlertTriangle, X, Loader2, RefreshCw } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
-import { patientsApi, doctorsApi } from '../../services/modules';
+import { patientsApi } from '../../services/modules';
+import useAuthStore from '../../store/authStore';
 
 const PRIORITY_MAP = {
   CRITICAL: { label: 'CRITICAL', cls: 'badge badge-critical', dot: '#ef4444' },
@@ -134,9 +135,23 @@ function RegisterModal({ onClose, onSuccess }) {
   );
 }
 
+const FilterBtn = ({ active, onClick, children }) => (
+  <button
+    onClick={onClick}
+    style={{
+      background: active ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-3)',
+      border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : 'var(--color-border)'}`,
+      borderRadius: '7px', color: active ? '#93c5fd' : 'var(--color-text-secondary)',
+      cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, padding: '0.4rem 0.875rem',
+      transition: 'all 0.15s', fontFamily: 'inherit',
+    }}
+  >{children}</button>
+);
+
 // ─── Main Patients Page ───────────────────────────────────────
 export default function Patients() {
   const qc = useQueryClient();
+  const { hasPermission } = useAuthStore();
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -157,19 +172,6 @@ export default function Patients() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['patients'] }),
   });
 
-  const FilterBtn = ({ value, active, onClick, children }) => (
-    <button
-      onClick={onClick}
-      style={{
-        background: active ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-3)',
-        border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : 'var(--color-border)'}`,
-        borderRadius: '7px', color: active ? '#93c5fd' : 'var(--color-text-secondary)',
-        cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, padding: '0.4rem 0.875rem',
-        transition: 'all 0.15s', fontFamily: 'inherit',
-      }}
-    >{children}</button>
-  );
-
   return (
     <Layout title="Patients" subtitle="Patient management & registration">
       {showModal && <RegisterModal onClose={() => setShowModal(false)} onSuccess={() => {}} />}
@@ -189,10 +191,12 @@ export default function Patients() {
         <button className="btn btn-secondary" style={{ gap: '0.375rem' }} onClick={() => qc.invalidateQueries({ queryKey: ['patients'] })}>
           <RefreshCw size={14} className={isFetching ? 'spin' : ''} />
         </button>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          <UserPlus size={15} />
-          Register Patient
-        </button>
+        {hasPermission('PATIENT_CREATE') && (
+          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+            <UserPlus size={15} />
+            Register Patient
+          </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -276,7 +280,7 @@ export default function Patients() {
                       {new Date(p.createdAt).toLocaleDateString()}
                     </td>
                     <td>
-                      {p.status !== 'DISCHARGED' && (
+                      {p.status !== 'DISCHARGED' && (hasPermission('PATIENT_UPDATE_OWN') || hasPermission('HOSPITAL_MANAGE')) && (
                         <button
                           className="btn btn-secondary"
                           style={{ fontSize: '0.72rem', padding: '0.3rem 0.6rem' }}

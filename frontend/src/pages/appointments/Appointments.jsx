@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import { appointmentsApi, patientsApi, doctorsApi } from '../../services/modules';
+import useAuthStore from '../../store/authStore';
 
 // ─── Status config ────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -18,7 +19,6 @@ const STATUS_CONFIG = {
 // ─── Helper: format date/time ─────────────────────────────────
 const fmtDate = (iso) => new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 const fmtTime = (iso) => new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-const fmtDateTime = (iso) => `${fmtDate(iso)} · ${fmtTime(iso)}`;
 
 // ─── Today's Schedule Strip ───────────────────────────────────
 function TodayStrip() {
@@ -114,7 +114,7 @@ function BookModal({ onClose }) {
   const doctors  = dData ?? [];
 
   // Min datetime = now
-  const minDt = new Date(Date.now() + 5 * 60_000).toISOString().slice(0, 16);
+  const [minDt] = useState(() => new Date(Date.now() + 5 * 60_000).toISOString().slice(0, 16));
 
   return (
     <div
@@ -212,14 +212,25 @@ function BookModal({ onClose }) {
   );
 }
 
+const FilterBtn = ({ active, onClick, children }) => (
+  <button onClick={onClick} style={{
+    background: active ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-3)',
+    border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : 'var(--color-border)'}`,
+    borderRadius: '7px', color: active ? '#93c5fd' : 'var(--color-text-secondary)',
+    cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, padding: '0.4rem 0.875rem',
+    transition: 'all 0.15s', fontFamily: 'inherit',
+  }}>{children}</button>
+);
+
 // ─── Main Appointments Page ───────────────────────────────────
 export default function Appointments() {
   const qc = useQueryClient();
+  const { hasPermission } = useAuthStore();
   const [showModal, setShowModal]       = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage]                 = useState(1);
 
-  const { data, isLoading, isFetching } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['appointments', statusFilter, page],
     queryFn: () => appointmentsApi.list({ status: statusFilter || undefined, page, limit: 15 }).then((r) => r.data),
     keepPreviousData: true,
@@ -235,16 +246,6 @@ export default function Appointments() {
       qc.invalidateQueries({ queryKey: ['appointments-today'] });
     },
   });
-
-  const FilterBtn = ({ active, onClick, children }) => (
-    <button onClick={onClick} style={{
-      background: active ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-3)',
-      border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : 'var(--color-border)'}`,
-      borderRadius: '7px', color: active ? '#93c5fd' : 'var(--color-text-secondary)',
-      cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, padding: '0.4rem 0.875rem',
-      transition: 'all 0.15s', fontFamily: 'inherit',
-    }}>{children}</button>
-  );
 
   // Check if appointment is upcoming (can still be cancelled)
   const isUpcoming = (iso) => new Date(iso) > new Date();
@@ -266,10 +267,12 @@ export default function Appointments() {
             </FilterBtn>
           ))}
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          <Plus size={15} />
-          Book Appointment
-        </button>
+        {hasPermission('PATIENT_CREATE') && (
+          <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+            <Plus size={15} />
+            Book Appointment
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -348,7 +351,7 @@ export default function Appointments() {
 
                     {/* Actions */}
                     <td>
-                      {a.status === 'SCHEDULED' && (
+                      {a.status === 'SCHEDULED' && (hasPermission('PATIENT_UPDATE_OWN') || hasPermission('HOSPITAL_MANAGE')) && (
                         <div style={{ display: 'flex', gap: '0.375rem' }}>
                           <button
                             className="btn btn-secondary"

@@ -7,20 +7,48 @@ import {
 import useAuthStore from '../../store/authStore';
 import { disconnectSocket } from '../../services/socket';
 
-const navItems = [
-  { to: '/dashboard',    label: 'Dashboard',       icon: LayoutDashboard },
-  { to: '/patients',     label: 'Patients',         icon: Users },
-  { to: '/doctors',      label: 'Doctors',          icon: Stethoscope },
-  { to: '/beds',         label: 'Beds',             icon: Bed },
-  { to: '/resources',    label: 'Resources',        icon: Package },
-  { to: '/appointments', label: 'Appointments',     icon: CalendarClock },
-];
+const getNavItems = (role, hasPermission) => {
+  if (role === 'SUPER_ADMIN') {
+    return [
+      { to: '/dashboard', label: 'Platform Overview', icon: LayoutDashboard },
+      { to: '/hospitals', label: 'Hospitals', icon: Hospital },
+      { to: '/users', label: 'Users', icon: Users },
+    ];
+  }
 
-const agentItems = [
-  { to: '/agent-activity', label: 'Agent Activity', icon: BrainCircuit },
-  { to: '/call-logs',      label: 'Call Logs',       icon: PhoneCall },
-  { to: '/notifications',  label: 'Notifications',   icon: Bell },
-];
+  const items = [
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  ];
+
+  if (hasPermission('PATIENT_VIEW_QUEUE') || hasPermission('PATIENT_VIEW_OWN')) {
+    items.push({ to: '/patients', label: 'Patients', icon: Users });
+    items.push({ to: '/appointments', label: 'Appointments', icon: CalendarClock });
+  }
+
+  if (hasPermission('PATIENT_VIEW_QUEUE')) {
+    items.push({ to: '/doctors', label: 'Doctors', icon: Stethoscope });
+  }
+
+  if (hasPermission('BED_MANAGE')) {
+    items.push({ to: '/beds', label: 'Beds', icon: Bed });
+  }
+
+  if (hasPermission('RESOURCE_MANAGE')) {
+    items.push({ to: '/resources', label: 'Resources', icon: Package });
+  }
+
+  return items;
+};
+
+const getAgentItems = (role, hasPermission) => {
+  const items = [];
+  if (hasPermission('AGENT_VIEW')) {
+    items.push({ to: '/agent-activity', label: 'Agent Activity', icon: BrainCircuit });
+    items.push({ to: '/call-logs', label: 'Call Logs', icon: PhoneCall });
+  }
+  items.push({ to: '/notifications', label: 'Notifications', icon: Bell });
+  return items;
+};
 
 const NavGroup = ({ label, items }) => (
   <div style={{ marginBottom: '0.5rem' }}>
@@ -47,7 +75,7 @@ const NavGroup = ({ label, items }) => (
 );
 
 export default function Sidebar() {
-  const { user, clearAuth } = useAuthStore();
+  const { user, clearAuth, hasPermission } = useAuthStore();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -104,8 +132,8 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav style={{ flex: 1, paddingTop: '0.5rem' }}>
-        <NavGroup label="Operations" items={navItems} />
-        <NavGroup label="AI Command" items={agentItems} />
+        <NavGroup label={user?.role === 'SUPER_ADMIN' ? 'Platform' : 'Operations'} items={getNavItems(user?.role, hasPermission)} />
+        <NavGroup label={user?.role === 'SUPER_ADMIN' ? 'System' : 'AI Command'} items={getAgentItems(user?.role, hasPermission)} />
       </nav>
 
       {/* Bottom — User + Settings */}

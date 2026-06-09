@@ -24,7 +24,6 @@ function LoadBar({ current, max }) {
 
 function DoctorCard({ doctor, onToggle, isToggling }) {
   const initials = doctor.user?.name?.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
-  const load     = Math.round((doctor.currentLoad / doctor.maxWorkload) * 100);
   const deptColor = DEPT_COLORS[doctor.departmentId?.charCodeAt(0) % DEPT_COLORS.length] ?? '#94a3b8';
 
   return (
@@ -95,6 +94,16 @@ function DoctorCard({ doctor, onToggle, isToggling }) {
   );
 }
 
+const FilterBtn = ({ active, onClick, children }) => (
+  <button onClick={onClick} style={{
+    background: active ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-3)',
+    border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : 'var(--color-border)'}`,
+    borderRadius: '7px', color: active ? '#93c5fd' : 'var(--color-text-secondary)',
+    cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, padding: '0.4rem 0.875rem',
+    transition: 'all 0.15s', fontFamily: 'inherit',
+  }}>{children}</button>
+);
+
 export default function Doctors() {
   const qc = useQueryClient();
   const [deptFilter, setDeptFilter] = useState('');
@@ -120,15 +129,6 @@ export default function Doctors() {
   });
 
   const doctors = data?.data ?? [];
-  const FilterBtn = ({ active, onClick, children }) => (
-    <button onClick={onClick} style={{
-      background: active ? 'rgba(59,130,246,0.15)' : 'var(--color-surface-3)',
-      border: `1px solid ${active ? 'rgba(59,130,246,0.4)' : 'var(--color-border)'}`,
-      borderRadius: '7px', color: active ? '#93c5fd' : 'var(--color-text-secondary)',
-      cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, padding: '0.4rem 0.875rem',
-      transition: 'all 0.15s', fontFamily: 'inherit',
-    }}>{children}</button>
-  );
 
   return (
     <Layout title="Doctors" subtitle="Medical staff profiles & workload management">

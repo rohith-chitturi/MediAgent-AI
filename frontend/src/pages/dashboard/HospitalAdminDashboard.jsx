@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   Users, Stethoscope, Bed, Activity, BrainCircuit,
-  TrendingUp, AlertTriangle, CheckCircle, Package, CalendarClock,
+  AlertTriangle, CheckCircle, Package, CalendarClock,
   Wifi, WifiOff,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell,
 } from 'recharts';
 import Layout from '../../components/layout/Layout';
 import { dashboardApi } from '../../services/modules';
@@ -92,7 +92,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function Dashboard() {
   const [liveActions, setLiveActions] = useState([]);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(() => getSocket()?.connected ?? false);
 
   const { data: statsData, refetch } = useQuery({
     queryKey: ['dashboard-stats'],
@@ -106,7 +106,6 @@ export default function Dashboard() {
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
-    setIsConnected(socket.connected);
     socket.on('connect',    () => setIsConnected(true));
     socket.on('disconnect', () => setIsConnected(false));
     socket.on('agent:action', (action) => {

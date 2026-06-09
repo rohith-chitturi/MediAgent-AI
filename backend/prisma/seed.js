@@ -13,13 +13,50 @@ const DEFAULT_PASSWORD = 'password123';
 async function main() {
   console.log('🌱 Seeding MediAgent AI database...\n');
 
+  // ─── Permissions ─────────────────────────────────────────────
+  console.log('Creating permissions...');
+  const permissionsList = [
+    'PLATFORM_VIEW', 'HOSPITAL_MANAGE', 'USER_MANAGE',
+    'PATIENT_CREATE', 'PATIENT_VIEW_QUEUE', 'PATIENT_VIEW_OWN', 'PATIENT_UPDATE_OWN',
+    'MEDICAL_NOTES_EDIT', 'BED_MANAGE', 'AGENT_VIEW', 'AGENT_RUN_VIEW', 'RESOURCE_MANAGE'
+  ];
+
+  await Promise.all(
+    permissionsList.map(action =>
+      prisma.permission.upsert({
+        where: { id: `perm-${action.toLowerCase()}` },
+        update: { action },
+        create: { id: `perm-${action.toLowerCase()}`, action }
+      })
+    )
+  );
+
+  const perms = await prisma.permission.findMany();
+  const getPermIds = (actions) => perms.filter(p => actions.includes(p.action)).map(p => ({ id: p.id }));
+
   // ─── Roles ───────────────────────────────────────────────────
   console.log('Creating roles...');
   const roles = await Promise.all([
-    prisma.role.upsert({ where: { name: 'SUPER_ADMIN' },    update: {}, create: { name: 'SUPER_ADMIN' } }),
-    prisma.role.upsert({ where: { name: 'HOSPITAL_ADMIN' }, update: {}, create: { name: 'HOSPITAL_ADMIN' } }),
-    prisma.role.upsert({ where: { name: 'DOCTOR' },         update: {}, create: { name: 'DOCTOR' } }),
-    prisma.role.upsert({ where: { name: 'RECEPTIONIST' },   update: {}, create: { name: 'RECEPTIONIST' } }),
+    prisma.role.upsert({
+      where: { name: 'SUPER_ADMIN' },
+      update: { permissions: { set: getPermIds(['PLATFORM_VIEW', 'HOSPITAL_MANAGE', 'USER_MANAGE', 'AGENT_VIEW', 'AGENT_RUN_VIEW']) } },
+      create: { name: 'SUPER_ADMIN', permissions: { connect: getPermIds(['PLATFORM_VIEW', 'HOSPITAL_MANAGE', 'USER_MANAGE', 'AGENT_VIEW', 'AGENT_RUN_VIEW']) } }
+    }),
+    prisma.role.upsert({
+      where: { name: 'HOSPITAL_ADMIN' },
+      update: { permissions: { set: getPermIds(['HOSPITAL_MANAGE', 'USER_MANAGE', 'PATIENT_CREATE', 'PATIENT_VIEW_QUEUE', 'BED_MANAGE', 'AGENT_VIEW', 'AGENT_RUN_VIEW', 'RESOURCE_MANAGE']) } },
+      create: { name: 'HOSPITAL_ADMIN', permissions: { connect: getPermIds(['HOSPITAL_MANAGE', 'USER_MANAGE', 'PATIENT_CREATE', 'PATIENT_VIEW_QUEUE', 'BED_MANAGE', 'AGENT_VIEW', 'AGENT_RUN_VIEW', 'RESOURCE_MANAGE']) } }
+    }),
+    prisma.role.upsert({
+      where: { name: 'DOCTOR' },
+      update: { permissions: { set: getPermIds(['PATIENT_VIEW_OWN', 'PATIENT_UPDATE_OWN', 'MEDICAL_NOTES_EDIT']) } },
+      create: { name: 'DOCTOR', permissions: { connect: getPermIds(['PATIENT_VIEW_OWN', 'PATIENT_UPDATE_OWN', 'MEDICAL_NOTES_EDIT']) } }
+    }),
+    prisma.role.upsert({
+      where: { name: 'RECEPTIONIST' },
+      update: { permissions: { set: getPermIds(['PATIENT_CREATE', 'PATIENT_VIEW_QUEUE', 'BED_MANAGE']) } },
+      create: { name: 'RECEPTIONIST', permissions: { connect: getPermIds(['PATIENT_CREATE', 'PATIENT_VIEW_QUEUE', 'BED_MANAGE']) } }
+    }),
   ]);
   const [superAdminRole, adminRole, doctorRole, receptionistRole] = roles;
 

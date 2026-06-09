@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-const useNotificationStore = create((set, get) => ({
+const useNotificationStore = create((set) => ({
   notifications: [],
   unreadCount: 0,
 
