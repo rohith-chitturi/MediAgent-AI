@@ -11,6 +11,7 @@ import Beds           from './pages/beds/Beds';
 import Resources      from './pages/resources/Resources';
 import Appointments   from './pages/appointments/Appointments';
 import PlaceholderPage from './pages/PlaceholderPage';
+import CommandPalette from './components/ui/CommandPalette';
 
 // Dashboards
 import HospitalAdminDashboard from './pages/dashboard/HospitalAdminDashboard';
@@ -65,6 +66,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <CommandPalette />
         <Routes>
           {/* Public */}
           <Route path="/login" element={

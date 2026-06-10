@@ -44,3 +44,7 @@ export const dashboardApi = {
   agentActivity: (params) => api.get('/dashboard/agent-activity', { params }),
   notifications: (params) => api.get('/dashboard/notifications', { params }),
 };
+
+export const agentActivityApi = {
+  listRuns: (params) => api.get('/agent-activity/runs', { params }),
+};

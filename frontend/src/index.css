@@ -1,40 +1,43 @@
 @import "tailwindcss";
 
 
-/* ─── Design Tokens ───────────────────────────────────────── */
+/* ─── Design Tokens (Modern Healthcare SaaS) ──────────────── */
 :root {
-  /* Brand */
-  --color-brand-50:  #eff6ff;
-  --color-brand-100: #dbeafe;
+  /* Slate Theme */
+  --color-brand-50:  #f8fafc;
+  --color-brand-100: #f1f5f9;
   --color-brand-400: #60a5fa;
   --color-brand-500: #3b82f6;
   --color-brand-600: #2563eb;
   --color-brand-700: #1d4ed8;
 
+  /* Secondary Accent (Teal) */
+  --color-secondary-500: #14b8a6;
+
   /* Surfaces */
-  --color-bg:         #040713;
-  --color-surface:    #0c1124;
-  --color-surface-2:  #111827;
-  --color-surface-3:  #1a2236;
-  --color-border:     rgba(255,255,255,0.07);
-  --color-border-2:   rgba(255,255,255,0.12);
+  --color-bg:         #0f172a; /* Slate 900 */
+  --color-surface:    #111827; /* Gray 900 / Slate 800-ish */
+  --color-surface-2:  #1e293b; /* Slate 800 */
+  --color-surface-3:  #334155; /* Slate 700 */
+  --color-border:     rgba(255,255,255,0.08);
+  --color-border-2:   rgba(255,255,255,0.15);
 
   /* Text */
-  --color-text-primary:   #f1f5f9;
+  --color-text-primary:   #f8fafc;
   --color-text-secondary: #94a3b8;
-  --color-text-muted:     #475569;
+  --color-text-muted:     #64748b;
 
-  /* Status */
-  --color-critical: #ef4444;
-  --color-high:     #f97316;
-  --color-medium:   #eab308;
-  --color-low:      #22c55e;
-  --color-success:  #10b981;
+  /* Semantic Status */
+  --color-critical: #ef4444; /* Red 500 */
+  --color-high:     #f97316; /* Orange 500 */
+  --color-medium:   #f59e0b; /* Amber 500 */
+  --color-low:      #10b981; /* Emerald 500 */
+  --color-success:  #22c55e; /* Green 500 */
   --color-warning:  #f59e0b;
   --color-info:     #3b82f6;
 
   /* Confidence */
-  --color-high-conf:   #10b981;
+  --color-high-conf:   #22c55e;
   --color-med-conf:    #f59e0b;
   --color-low-conf:    #ef4444;
 
@@ -94,14 +97,14 @@ a { color: var(--color-brand-400); text-decoration: none; }
 
 /* ─── Utilities ───────────────────────────────────────────── */
 .glass {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(30, 41, 59, 0.4); /* Slate 800 */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--color-border);
 }
 
 .glass-heavy {
-  background: rgba(12, 17, 36, 0.85);
+  background: rgba(15, 23, 42, 0.85); /* Slate 900 */
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--color-border-2);
