@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const ctrl = require('./agentActivity.controller');
-const { authenticate, scopeToHospital } = require('../../middleware/auth.service');
-const { requirePermission } = require('../../middleware/rbac.middleware');
+const { authenticate } = require('../../middleware/auth.middleware');
+const { requirePermission, scopeToHospital } = require('../../middleware/rbac.middleware');
 
 const router = Router();
 
