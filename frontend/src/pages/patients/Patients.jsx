@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { UserPlus, Search, AlertTriangle, X, Loader2, RefreshCw } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../../components/layout/Layout';
 import { patientsApi } from '../../services/modules';
 import useAuthStore from '../../store/authStore';
@@ -151,6 +152,7 @@ const FilterBtn = ({ active, onClick, children }) => (
 // ─── Main Patients Page ───────────────────────────────────────
 export default function Patients() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { hasPermission } = useAuthStore();
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState('');
@@ -174,7 +176,7 @@ export default function Patients() {
 
   return (
     <Layout title="Patients" subtitle="Patient management & registration">
-      {showModal && <RegisterModal onClose={() => setShowModal(false)} onSuccess={() => {}} />}
+      {showModal && <RegisterModal onClose={() => setShowModal(false)} onSuccess={() => navigate('/agent-activity')} />}
 
       {/* Top bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>

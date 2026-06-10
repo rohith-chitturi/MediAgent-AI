@@ -12,6 +12,7 @@ import Resources      from './pages/resources/Resources';
 import Appointments   from './pages/appointments/Appointments';
 import PlaceholderPage from './pages/PlaceholderPage';
 import CommandPalette from './components/ui/CommandPalette';
+import AgentActivity  from './pages/agent-activity/AgentActivity';
 
 // Dashboards
 import HospitalAdminDashboard from './pages/dashboard/HospitalAdminDashboard';
@@ -94,7 +95,7 @@ export default function App() {
           } />
           <Route path="/agent-activity" element={
             <ProtectedRoute permission="AGENT_VIEW">
-              <PlaceholderPage title="Agent Activity" subtitle="AI agent decision timeline" icon={BrainCircuit} />
+              <AgentActivity />
             </ProtectedRoute>
           } />
           <Route path="/call-logs" element={
