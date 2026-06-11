@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { BrainCircuit, CheckCircle, Clock, AlertTriangle, ArrowRight, UserPlus, Bed, Stethoscope, Bell } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import EmptyState from '../../components/ui/EmptyState';
@@ -20,13 +20,13 @@ function WorkflowNode({ step, action, isLast, isActive }) {
   const isFailed = action?.status === 'FAILED';
   const Icon = step.icon;
   
-  let nodeColor = 'border-[var(--color-border-2)] bg-[var(--color-surface-2)] text-[var(--color-text-muted)]';
-  if (isCompleted) nodeColor = 'border-[var(--color-brand-500)] bg-[var(--color-brand-600)] text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]';
-  if (isFailed) nodeColor = 'border-rose-500 bg-rose-600 text-white shadow-[0_0_15px_rgba(244,63,94,0.5)]';
-  if (isActive && !isCompleted && !isFailed) nodeColor = 'border-amber-500 bg-amber-500/20 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)] animate-pulse';
+  let nodeColor = 'border-slate-200 bg-white text-slate-400';
+  if (isCompleted) nodeColor = 'border-blue-500 bg-blue-600 text-white shadow-[0_0_15px_rgba(59,130,246,0.3)]';
+  if (isFailed) nodeColor = 'border-rose-500 bg-rose-600 text-white shadow-[0_0_15px_rgba(244,63,94,0.3)]';
+  if (isActive && !isCompleted && !isFailed) nodeColor = 'border-amber-500 bg-amber-50 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.2)] animate-pulse';
   
   // Intake is always completed if we have a run
-  if (step.id === 'intake') nodeColor = 'border-emerald-500 bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]';
+  if (step.id === 'intake') nodeColor = 'border-emerald-500 bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]';
 
   return (
     <div className="flex flex-col items-center relative w-full mb-12">
@@ -37,19 +37,19 @@ function WorkflowNode({ step, action, isLast, isActive }) {
       >
         <Icon className="w-6 h-6" />
         {isCompleted && step.id !== 'intake' && (
-          <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full text-white">
+          <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full text-white shadow-sm">
             <CheckCircle className="w-4 h-4" />
           </div>
         )}
       </motion.div>
       
-      <span className={`mt-3 text-sm font-semibold tracking-wide ${isCompleted || step.id === 'intake' ? 'text-white' : 'text-[var(--color-text-muted)]'}`}>
+      <span className={`mt-3 text-sm font-bold tracking-wide ${isCompleted || step.id === 'intake' ? 'text-slate-900' : 'text-slate-400'}`}>
         {step.label}
       </span>
 
       {/* Connection Line */}
       {!isLast && (
-        <div className="absolute top-[3.5rem] w-0.5 h-12 bg-[var(--color-border-2)] -z-10" />
+        <div className="absolute top-[3.5rem] w-0.5 h-12 bg-slate-200 -z-10" />
       )}
 
       {/* Decision Summary Card */}
@@ -57,27 +57,27 @@ function WorkflowNode({ step, action, isLast, isActive }) {
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="absolute left-1/2 ml-12 top-0 w-80 glass p-4 rounded-lg border border-[var(--color-border-2)] text-left"
+          className="absolute left-1/2 ml-12 top-0 w-80 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm text-left hover:shadow-md transition-shadow"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-brand-400)]">Decision</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-600">Decision Summary</span>
             {action.confidenceLevel && (
                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  action.confidenceLevel === 'HIGH' ? 'bg-emerald-500/20 text-emerald-400' :
-                  action.confidenceLevel === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400' :
-                  'bg-rose-500/20 text-rose-400'
+                  action.confidenceLevel === 'HIGH' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                  action.confidenceLevel === 'MEDIUM' ? 'bg-amber-50 text-amber-600 border border-amber-200' :
+                  'bg-rose-50 text-rose-600 border border-rose-200'
                }`}>
-                 {action.confidenceLevel} CONFIDENCE
+                 {action.confidenceLevel} CONF
                </span>
             )}
           </div>
-          <p className="text-sm text-[var(--color-text-primary)] mb-3 leading-relaxed">
+          <p className="text-sm text-slate-700 mb-3 leading-relaxed font-medium">
             {action.decisionSummary}
           </p>
           {action.recommendedAction && (
-            <div className="flex gap-2 items-start bg-[var(--color-surface-2)] p-2 rounded border border-[var(--color-border)]">
-              <ArrowRight className="w-4 h-4 text-[var(--color-brand-400)] mt-0.5 shrink-0" />
-              <span className="text-xs font-medium text-[var(--color-text-secondary)]">{action.recommendedAction}</span>
+            <div className="flex gap-2 items-start bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+              <ArrowRight className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+              <span className="text-xs font-bold text-slate-600">{action.recommendedAction}</span>
             </div>
           )}
         </motion.div>
@@ -97,7 +97,6 @@ export default function AgentActivity() {
 
   const runs = runsData?.data || [];
 
-  // WebSocket integration
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
@@ -111,7 +110,6 @@ export default function AgentActivity() {
     };
   }, [refetch]);
 
-  // Auto-select newest run if none selected
   useEffect(() => {
     if (!selectedRunId && runs.length > 0) {
       setSelectedRunId(runs[0].id);
@@ -121,40 +119,42 @@ export default function AgentActivity() {
   const selectedRun = runs.find(r => r.id === selectedRunId);
 
   return (
-    <Layout title="Mission Control" subtitle="Live AI workflow visualization">
+    <Layout title="Mission Control" subtitle="Live autonomous workflow orchestration">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-140px)]">
         
         {/* Left Pane: Recent Runs */}
-        <div className="lg:col-span-3 glass rounded-[var(--radius-lg)] overflow-hidden flex flex-col">
-          <div className="px-5 py-4 border-b border-[var(--color-border-2)] bg-[var(--color-surface-2)]/50">
-            <h3 className="font-semibold text-white tracking-wide flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[var(--color-brand-400)]" />
+        <div className="lg:col-span-3 bg-white border border-slate-200 rounded-[var(--radius-lg)] overflow-hidden flex flex-col shadow-sm">
+          <div className="px-5 py-4 border-b border-slate-200 bg-slate-50">
+            <h3 className="font-bold text-slate-900 tracking-wide flex items-center gap-2 text-sm uppercase">
+              <Clock className="w-4 h-4 text-indigo-600" />
               Recent Workflows
             </h3>
           </div>
-          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-white">
             {runs.length === 0 ? (
-              <p className="text-center text-sm text-[var(--color-text-muted)] mt-10">No workflows found.</p>
+              <p className="text-center text-sm text-slate-400 mt-10 font-medium">No workflows found.</p>
             ) : (
               runs.map(run => (
                 <button
                   key={run.id}
                   onClick={() => setSelectedRunId(run.id)}
-                  className={`w-full text-left p-3 rounded-lg border transition-all ${
+                  className={`w-full text-left p-3 rounded-xl border transition-all ${
                     selectedRunId === run.id 
-                      ? 'bg-[var(--color-surface-2)] border-[var(--color-brand-500)] shadow-[0_0_10px_rgba(59,130,246,0.1)]' 
-                      : 'bg-transparent border-transparent hover:bg-[var(--color-surface-3)] hover:border-[var(--color-border)]'
+                      ? 'bg-indigo-50 border-indigo-200 shadow-sm' 
+                      : 'bg-white border-transparent hover:bg-slate-50 hover:border-slate-200'
                   }`}
                 >
                   <div className="flex justify-between items-center mb-1">
-                    <span className="font-mono text-xs font-bold text-white">{run.displayRunId}</span>
+                    <span className={`font-mono text-xs font-bold ${selectedRunId === run.id ? 'text-indigo-700' : 'text-slate-700'}`}>
+                      {run.displayRunId}
+                    </span>
                     <span className={`w-2 h-2 rounded-full ${
-                      run.workflowStatus === 'COMPLETED' ? 'bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]' : 
-                      run.workflowStatus === 'FAILED' ? 'bg-rose-500 shadow-[0_0_5px_rgba(244,63,94,0.5)]' : 
-                      'bg-amber-500 animate-pulse shadow-[0_0_5px_rgba(245,158,11,0.5)]'
+                      run.workflowStatus === 'COMPLETED' ? 'bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.3)]' : 
+                      run.workflowStatus === 'FAILED' ? 'bg-rose-500 shadow-[0_0_5px_rgba(244,63,94,0.3)]' : 
+                      'bg-amber-500 animate-pulse shadow-[0_0_5px_rgba(245,158,11,0.3)]'
                     }`} />
                   </div>
-                  <div className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">
+                  <div className={`text-[10px] uppercase tracking-wider font-bold ${selectedRunId === run.id ? 'text-indigo-400' : 'text-slate-400'}`}>
                     {new Date(run.startedAt).toLocaleTimeString()}
                   </div>
                 </button>
@@ -164,40 +164,38 @@ export default function AgentActivity() {
         </div>
 
         {/* Main Pane: Workflow Visualization */}
-        <div className="lg:col-span-9 glass rounded-[var(--radius-lg)] overflow-hidden flex flex-col relative">
+        <div className="lg:col-span-9 bg-white border border-slate-200 rounded-[var(--radius-lg)] overflow-hidden flex flex-col relative shadow-sm">
           {/* Header */}
           {selectedRun && (
-            <div className="px-6 py-5 border-b border-[var(--color-border-2)] bg-[var(--color-surface-2)] flex justify-between items-center">
+            <div className="px-6 py-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold font-mono tracking-tight text-white">{selectedRun.displayRunId}</h2>
-                <span className={`text-xs font-bold px-2 py-0.5 rounded mt-1 inline-block ${
-                  selectedRun.workflowStatus === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-400' :
-                  selectedRun.workflowStatus === 'FAILED' ? 'bg-rose-500/20 text-rose-400' :
-                  'bg-amber-500/20 text-amber-400'
+                <h2 className="text-xl font-bold font-mono tracking-tight text-slate-900">{selectedRun.displayRunId}</h2>
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full mt-2 inline-block border ${
+                  selectedRun.workflowStatus === 'COMPLETED' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+                  selectedRun.workflowStatus === 'FAILED' ? 'bg-rose-50 text-rose-600 border-rose-200' :
+                  'bg-amber-50 text-amber-600 border-amber-200'
                 }`}>
                   STATUS: {selectedRun.workflowStatus}
                 </span>
               </div>
-              <div className="text-right text-sm text-[var(--color-text-muted)]">
+              <div className="text-right text-sm font-bold text-slate-400">
                 Duration: {selectedRun.durationMs ? `${(selectedRun.durationMs / 1000).toFixed(2)}s` : 'In progress...'}
               </div>
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto p-12 bg-gradient-to-b from-[var(--color-surface)] to-[var(--color-bg)]">
+          <div className="flex-1 overflow-y-auto p-12 bg-slate-50/50">
             {!selectedRun ? (
               <EmptyState 
                 icon={BrainCircuit}
                 title="Mission Control"
-                description="Select an Agent Workflow from the sidebar to view its real-time execution trace."
+                description="Select an Agent Workflow from the sidebar to view its real-time orchestration trace."
               />
             ) : (
               <div className="max-w-2xl mx-auto flex flex-col items-center pt-8">
                 {WORKFLOW_STEPS.map((step, idx) => {
                   const action = selectedRun.actions?.find(a => a.agentName === step.id);
                   const isLast = idx === WORKFLOW_STEPS.length - 1;
-                  // If we don't have an action, but the run is still RUNNING and the previous step completed, this is the ACTIVE step.
-                  // For demo purposes, we will highlight it if it's the next logical step.
                   const prevAction = idx > 1 ? selectedRun.actions?.find(a => a.agentName === WORKFLOW_STEPS[idx-1].id) : null;
                   const isActive = !action && selectedRun.workflowStatus === 'RUNNING' && (idx === 1 || prevAction?.status === 'COMPLETED');
 
