@@ -18,8 +18,7 @@ export default function Header({ title, subtitle }) {
   return (
     <header style={{
       alignItems: 'center',
-      background: 'rgba(4,7,19,0.8)',
-      backdropFilter: 'blur(12px)',
+      background: 'var(--color-surface)',
       borderBottom: '1px solid var(--color-border)',
       display: 'flex',
       gap: '1rem',
@@ -56,7 +55,7 @@ export default function Header({ title, subtitle }) {
           <input
             placeholder="Search..."
             style={{
-              background: 'var(--color-surface-3)',
+              background: 'var(--color-surface-2)',
               border: '1px solid var(--color-border)',
               borderRadius: '8px',
               color: 'var(--color-text-primary)',
@@ -76,7 +75,7 @@ export default function Header({ title, subtitle }) {
         <button
           onClick={() => navigate('/notifications')}
           style={{
-            background: 'var(--color-surface-3)',
+            background: 'var(--color-surface-2)',
             border: '1px solid var(--color-border)',
             borderRadius: '8px',
             color: 'var(--color-text-secondary)',

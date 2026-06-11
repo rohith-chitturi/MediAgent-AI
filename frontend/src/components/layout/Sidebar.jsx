@@ -89,7 +89,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div style={{
         padding: '1.25rem 1.5rem',
-        borderBottom: '1px solid var(--color-border)',
+        borderBottom: '1px solid var(--color-sidebar-border)',
         display: 'flex',
         alignItems: 'center',
         gap: '0.75rem',
@@ -105,10 +105,10 @@ export default function Sidebar() {
           <Hospital size={18} color="#fff" strokeWidth={2} />
         </div>
         <div>
-          <p style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-text-primary)' }}>
+          <p style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--color-sidebar-text)' }}>
             MediAgent
           </p>
-          <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>AI Platform</p>
+          <p style={{ fontSize: '0.7rem', color: 'var(--color-sidebar-text-muted)' }}>AI Platform</p>
         </div>
       </div>
 
@@ -137,7 +137,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom — User + Settings */}
-      <div style={{ borderTop: '1px solid var(--color-border)', padding: '0.75rem' }}>
+      <div style={{ borderTop: '1px solid var(--color-sidebar-border)', padding: '0.75rem' }}>
         <NavLink to="/settings" className={({ isActive }) =>
           `sidebar-link ${isActive ? 'active' : ''}`
         }>
@@ -148,8 +148,8 @@ export default function Sidebar() {
         {/* User info */}
         <div style={{
           alignItems: 'center',
-          background: 'var(--color-surface-3)',
-          border: '1px solid var(--color-border)',
+          background: 'var(--color-sidebar-surface)',
+          border: '1px solid var(--color-sidebar-border)',
           borderRadius: '10px',
           display: 'flex',
           gap: '0.625rem',
@@ -172,10 +172,10 @@ export default function Sidebar() {
             {user?.name?.[0]?.toUpperCase() ?? 'U'}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-sidebar-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.name ?? 'User'}
             </p>
-            <p style={{ fontSize: '0.68rem', color: 'var(--color-text-muted)' }}>
+            <p style={{ fontSize: '0.68rem', color: 'var(--color-sidebar-text-muted)' }}>
               {user?.role ?? ''}
             </p>
           </div>
@@ -185,14 +185,14 @@ export default function Sidebar() {
             style={{
               background: 'none',
               border: 'none',
-              color: 'var(--color-text-muted)',
+              color: 'var(--color-sidebar-text-muted)',
               cursor: 'pointer',
               padding: '2px',
               borderRadius: '4px',
               transition: 'color 0.2s',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-text-muted)')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--color-sidebar-text-muted)')}
           >
             <LogOut size={15} />
           </button>

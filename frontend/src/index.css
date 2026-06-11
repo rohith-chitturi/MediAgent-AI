@@ -14,18 +14,27 @@
   /* Secondary Accent (Teal) */
   --color-secondary-500: #14b8a6;
 
-  /* Surfaces */
-  --color-bg:         #0f172a; /* Slate 900 */
-  --color-surface:    #111827; /* Gray 900 / Slate 800-ish */
-  --color-surface-2:  #1e293b; /* Slate 800 */
-  --color-surface-3:  #334155; /* Slate 700 */
-  --color-border:     rgba(255,255,255,0.08);
-  --color-border-2:   rgba(255,255,255,0.15);
+  /* Surfaces (Light Workspace) */
+  --color-workspace-bg: #f8fafc; /* Soft Cloud */
+  --color-surface:    #ffffff; /* Pure White */
+  --color-surface-2:  #f1f5f9; /* Slate 100 */
+  --color-surface-3:  #e2e8f0; /* Slate 200 */
+  --color-border:     rgba(0,0,0,0.06);
+  --color-border-2:   rgba(0,0,0,0.12);
 
-  /* Text */
-  --color-text-primary:   #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted:     #64748b;
+  /* Shell (Dark Navigation) */
+  --color-sidebar-bg: #0f172a; /* Slate 900 */
+  --color-sidebar-surface: #1e293b; /* Slate 800 */
+  --color-sidebar-border: rgba(255,255,255,0.08);
+
+  /* Text (Light Workspace) */
+  --color-text-primary:   #0f172a; /* Near Black */
+  --color-text-secondary: #475569; /* Slate 600 */
+  --color-text-muted:     #64748b; /* Slate 500 */
+  
+  /* Text (Dark Shell) */
+  --color-sidebar-text: #f8fafc;
+  --color-sidebar-text-muted: #94a3b8;
 
   /* Semantic Status */
   --color-critical: #ef4444; /* Red 500 */
@@ -67,7 +76,7 @@ html {
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--color-bg);
+  background-color: var(--color-workspace-bg);
   color: var(--color-text-primary);
   min-height: 100vh;
   line-height: 1.6;
@@ -97,16 +106,14 @@ a { color: var(--color-brand-400); text-decoration: none; }
 
 /* ─── Utilities ───────────────────────────────────────────── */
 .glass {
-  background: rgba(30, 41, 59, 0.4); /* Slate 800 */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--color-surface);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
   border: 1px solid var(--color-border);
 }
 
 .glass-heavy {
-  background: rgba(15, 23, 42, 0.85); /* Slate 900 */
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: var(--color-surface);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
   border: 1px solid var(--color-border-2);
 }
 
@@ -122,8 +129,8 @@ a { color: var(--color-brand-400); text-decoration: none; }
 }
 .card-hover:hover {
   border-color: var(--color-border-2);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.08);
 }
 
 /* ─── Priority Badges ────────────────────────────────────── */
@@ -203,7 +210,7 @@ a { color: var(--color-brand-400); text-decoration: none; }
 }
 
 .gradient-surface {
-  background: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-bg) 100%);
+  background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-workspace-bg) 100%);
 }
 
 /* ─── Inputs ─────────────────────────────────────────────── */
@@ -308,8 +315,8 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
 
 /* ─── Sidebar ────────────────────────────────────────────── */
 .sidebar {
-  background: var(--color-surface);
-  border-right: 1px solid var(--color-border);
+  background: var(--color-sidebar-bg);
+  border-right: 1px solid var(--color-sidebar-border);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -324,7 +331,7 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
 .sidebar-link {
   align-items: center;
   border-radius: var(--radius-md);
-  color: var(--color-text-secondary);
+  color: var(--color-sidebar-text-muted);
   display: flex;
   font-size: 0.875rem;
   font-weight: 500;
@@ -336,7 +343,7 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
 }
 .sidebar-link:hover {
   background: rgba(255,255,255,0.05);
-  color: var(--color-text-primary);
+  color: var(--color-sidebar-text);
 }
 .sidebar-link.active {
   background: rgba(59,130,246,0.12);
