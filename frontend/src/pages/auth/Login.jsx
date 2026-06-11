@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { BrainCircuit, Hospital, Activity, Database, CheckCircle, Network, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import useAuthStore from '../../store/authStore';
-import { authApi } from '../../services/modules';
+import api from '../../services/api';
 
 function AnimatedWorkflow() {
   return (
@@ -77,7 +77,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const { data } = await authApi.login(email, password);
+      const { data } = await api.post('/auth/login', { email, password });
       setAuth(data.user, data.token);
       navigate('/dashboard');
     } catch (err) {
