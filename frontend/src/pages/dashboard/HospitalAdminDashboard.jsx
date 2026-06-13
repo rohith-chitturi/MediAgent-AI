@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { 
   UserPlus, AlertTriangle, CheckCircle, 
   BrainCircuit, Bed, Activity, Network, HeartPulse, Stethoscope, 
-  Package, Wifi, WifiOff, FileText, ArrowRight, ShieldCheck, Zap
+  Package, Wifi, WifiOff
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -11,197 +11,193 @@ import Layout from '../../components/layout/Layout';
 import { dashboardApi } from '../../services/modules';
 import { getSocket } from '../../services/socket';
 
-// ─── 1. Hospital Hero Section ──────────────────────────────────────────
+// ─── 1. Hospital Hero Section (Enterprise Redesign) ─────────────────────
 function HospitalHero({ stats, isConnected }) {
-  const isStable = (stats?.patients?.critical ?? 0) === 0;
-
   return (
-    <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-gradient-to-br from-indigo-900 via-slate-900 to-teal-900 border border-[var(--color-border-2)] p-8 shadow-2xl col-span-12">
-      {/* Background Healthcare SVG Illustration */}
-      <svg className="absolute right-0 top-0 h-full w-1/3 opacity-10 text-white pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-        <circle cx="12" cy="12" r="10" />
-      </svg>
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-8 col-span-12 flex flex-col md:flex-row justify-between items-start md:items-center relative overflow-hidden shadow-sm">
+      {/* Subtle AI Glow */}
+      <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none" />
       
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-5 gap-8">
-        <div className="md:col-span-2 flex flex-col justify-center">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-teal-400"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
-            </span>
-            <h2 className="text-sm font-bold text-teal-300 uppercase tracking-wider">
-              AI Coordinating Operations
-            </h2>
+      <div className="relative z-10">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
           </div>
-          <h1 className="text-4xl font-black text-white tracking-tight mb-2">Apollo Hospital</h1>
-          <p className="text-sm text-slate-400 flex items-center gap-2">
-            {isConnected ? <><Wifi size={14} className="text-emerald-500" /> Live Agent Stream Active</> : <><WifiOff size={14} className="text-amber-500" /> Reconnecting Agents...</>}
-          </p>
+          <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest">
+            AI Workforce Active
+          </span>
         </div>
+        <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Apollo Hospital Operations</h1>
+        <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-2">
+          {isConnected ? <><Wifi size={12} className="text-emerald-400" /> System Stream Connected</> : <><WifiOff size={12} className="text-amber-400" /> Reconnecting Stream...</>}
+        </p>
+      </div>
 
-        <div className="md:col-span-3 grid grid-cols-3 gap-4">
-          <div className="bg-white/5 backdrop-blur-sm p-5 rounded-2xl border border-white/10 flex flex-col justify-center">
-            <span className="text-[10px] uppercase text-slate-400 font-bold mb-1 tracking-wider">Workflows Today</span>
-            <span className="text-4xl font-black text-white">{stats?.agentRunsToday || 284}</span>
-          </div>
-          <div className="bg-white/5 backdrop-blur-sm p-5 rounded-2xl border border-white/10 flex flex-col justify-center relative overflow-hidden">
-             {stats?.patients?.critical > 0 && <div className="absolute top-0 right-0 w-16 h-16 bg-rose-500 blur-2xl opacity-30 rounded-full" />}
-            <span className="text-[10px] uppercase text-slate-400 font-bold mb-1 tracking-wider">Critical Reviews</span>
-            <span className={`text-4xl font-black ${stats?.patients?.critical > 0 ? 'text-rose-400' : 'text-white'}`}>{stats?.patients?.critical || 0}</span>
-          </div>
-          <div className="bg-gradient-to-br from-indigo-500/20 to-purple-500/20 backdrop-blur-sm p-5 rounded-2xl border border-indigo-500/30 flex flex-col justify-center">
-            <span className="text-[10px] uppercase text-indigo-300 font-bold mb-1 tracking-wider">Last AI Decision</span>
-            <span className="text-sm font-semibold text-white leading-tight mt-1">Doctor Assigned to ICU Patient (98% Conf)</span>
-          </div>
+      <div className="relative z-10 flex gap-8 mt-6 md:mt-0">
+        <div className="flex flex-col items-end">
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1.5">Active Workflows</span>
+          <span className="text-2xl font-bold text-white">{stats?.agentRunsToday || 284}</span>
+        </div>
+        <div className="w-px h-12 bg-slate-800" />
+        <div className="flex flex-col items-end">
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1.5">Critical Alerts</span>
+          <span className={`text-2xl font-bold ${stats?.patients?.critical > 0 ? 'text-rose-400' : 'text-white'}`}>{stats?.patients?.critical || 0}</span>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── 2. Quick Action Cards (Light Theme) ────────────────────────────────
-function QuickActionCard({ icon: Icon, title, description, color, onClick }) {
-  const colorMap = {
-    blue: 'bg-blue-50 text-blue-600 group-hover:bg-blue-100 border-blue-200 hover:border-blue-300',
-    rose: 'bg-rose-50 text-rose-600 group-hover:bg-rose-100 border-rose-200 hover:border-rose-300',
-    amber: 'bg-amber-50 text-amber-600 group-hover:bg-amber-100 border-amber-200 hover:border-amber-300',
-    purple: 'bg-purple-50 text-purple-600 group-hover:bg-purple-100 border-purple-200 hover:border-purple-300',
-  };
-
+// ─── 2. Quick Action Cards (Command Bar Style) ──────────────────────────
+function QuickActionCard({ icon: Icon, title, description, onClick }) {
   return (
     <motion.button
       whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.99 }}
       onClick={onClick}
-      className={`bg-white p-5 rounded-2xl border border-slate-200 flex flex-col items-start text-left transition-all shadow-sm hover:shadow-md group`}
+      className="bg-white p-5 rounded-2xl border border-slate-200 flex items-center gap-5 text-left transition-all hover:border-indigo-300 hover:shadow-md shadow-sm group"
     >
-      <div className={`p-3 rounded-xl mb-4 transition-colors ${colorMap[color].split(' ')[0]} ${colorMap[color].split(' ')[1]} ${colorMap[color].split(' ')[2]}`}>
-        <Icon size={22} strokeWidth={2.5} />
+      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-500 group-hover:text-indigo-600 group-hover:bg-indigo-50 transition-colors">
+        <Icon size={20} strokeWidth={2.5} />
       </div>
-      <h3 className="font-bold text-slate-900 text-sm">{title}</h3>
-      <p className="text-xs text-slate-500 mt-1 line-clamp-2 font-medium">{description}</p>
+      <div>
+        <h3 className="font-semibold text-slate-900 text-sm tracking-tight">{title}</h3>
+        <p className="text-xs text-slate-500 font-medium mt-0.5">{description}</p>
+      </div>
     </motion.button>
   );
 }
 
-// ─── 3. Visual Department Cards (Light Theme) ───────────────────────────
-function DepartmentCard({ name, icon: Icon, occupied, total, color }) {
+// ─── 3. Visual Department Capacity (Slim Stripe Style) ──────────────────
+function DepartmentCard({ name, icon: Icon, occupied, total }) {
   const percentage = total > 0 ? Math.round((occupied / total) * 100) : 0;
   
-  const bgMap = {
-    rose: 'bg-rose-500',
-    amber: 'bg-amber-500',
-    emerald: 'bg-emerald-500',
-    blue: 'bg-blue-500',
-  };
-  const textMap = {
-    rose: 'text-rose-500',
-    amber: 'text-amber-500',
-    emerald: 'text-emerald-500',
-    blue: 'text-blue-500',
-  };
+  let barColor = "bg-slate-800";
+  let textColor = "text-slate-900";
+  if (percentage >= 90) { barColor = "bg-rose-500"; textColor = "text-rose-600"; }
+  else if (percentage >= 75) { barColor = "bg-amber-500"; textColor = "text-amber-600"; }
 
   return (
-    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-      <div className="flex justify-between items-center mb-3">
-        <div className="flex items-center gap-2">
-          <Icon className={`w-4 h-4 ${textMap[color]}`} />
-          <span className="font-semibold text-slate-900 text-sm">{name}</span>
+    <div className="py-3.5 border-b border-slate-100 last:border-0">
+      <div className="flex justify-between items-center mb-2.5">
+        <div className="flex items-center gap-2.5">
+          <Icon className="w-[18px] h-[18px] text-slate-400" />
+          <span className="font-medium text-slate-800 text-sm">{name}</span>
         </div>
-        <span className="text-xs font-bold text-slate-500">{percentage}%</span>
+        <div className="flex items-center gap-4">
+          <span className="text-xs font-medium text-slate-500">{occupied} / {total}</span>
+          <span className={`text-xs font-bold w-10 text-right ${textColor}`}>{percentage}%</span>
+        </div>
       </div>
-      
-      {/* Visual Fill Indicator */}
-      <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden mb-2">
-        <div className={`h-full ${bgMap[color]} transition-all duration-1000`} style={{ width: `${percentage}%` }} />
-      </div>
-      <div className="flex justify-between text-[10px] uppercase text-slate-400 font-bold tracking-wider">
-        <span>{occupied} Occupied</span>
-        <span>{total - occupied} Available</span>
+      <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+        <div className={`h-full ${barColor} transition-all duration-1000 ease-out`} style={{ width: `${percentage}%` }} />
       </div>
     </div>
   );
 }
 
-// ─── 4. Today's AI Impact (New Premium Widget) ─────────────────────────
+// ─── 4. Today's AI Impact (Clean Enterprise Typography) ─────────────────
 function AIImpactWidget() {
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full">
-      <h3 className="font-bold text-slate-900 tracking-tight mb-5 text-sm uppercase flex items-center gap-2">
-        <Zap className="w-4 h-4 text-amber-500" /> Today's AI Impact
-      </h3>
-      <div className="grid grid-cols-2 gap-4 flex-1">
-        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col justify-center">
-          <span className="text-3xl font-black text-indigo-600">47</span>
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wide mt-1">Patients Triaged</span>
+    <div className="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 flex flex-col h-full shadow-sm">
+      <h3 className="font-bold text-slate-900 text-xs uppercase tracking-widest mb-8">Autonomous Impact (24h)</h3>
+      <div className="grid grid-cols-2 gap-x-8 gap-y-10 flex-1">
+        <div>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Patients Triaged</span>
+          <div className="flex items-baseline gap-3">
+            <span className="text-3xl font-black text-slate-900 tracking-tight">47</span>
+            <span className="text-[10px] text-teal-700 font-bold bg-teal-50 px-2 py-0.5 rounded border border-teal-100">↑ 12%</span>
+          </div>
         </div>
-        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col justify-center">
-          <span className="text-3xl font-black text-emerald-600">23</span>
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wide mt-1">Dr. Assignments</span>
+        <div>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Dr. Assignments</span>
+          <div className="flex items-baseline gap-3">
+            <span className="text-3xl font-black text-slate-900 tracking-tight">23</span>
+            <span className="text-[10px] text-teal-700 font-bold bg-teal-50 px-2 py-0.5 rounded border border-teal-100">↑ 5%</span>
+          </div>
         </div>
-        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col justify-center">
-          <span className="text-3xl font-black text-blue-600">18</span>
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wide mt-1">Bed Allocations</span>
+        <div>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Bed Allocations</span>
+          <span className="text-3xl font-black text-slate-900 tracking-tight">18</span>
         </div>
-        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col justify-center">
-          <span className="text-3xl font-black text-rose-600">6</span>
-          <span className="text-xs font-bold text-slate-500 uppercase tracking-wide mt-1">Alerts Prevented</span>
+        <div>
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Alerts Prevented</span>
+          <span className="text-3xl font-black text-indigo-600 tracking-tight">6</span>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── 5. Current AI Activity (Main Character Widget) ─────────────────────
-function CurrentAIActivity() {
+// ─── 5. AI Mission Control (Signature Feature) ──────────────────────────
+function MissionControl() {
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="font-bold text-slate-900 tracking-tight text-sm uppercase flex items-center gap-2">
-          <BrainCircuit className="w-4 h-4 text-indigo-600" /> MediAgent AI Status
-        </h3>
-        <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> ACTIVE
+    <div className="bg-[#0a0a0a] border border-slate-800 rounded-2xl flex flex-col h-full shadow-xl overflow-hidden relative">
+      {/* Ambient background inside widget */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-teal-500/5 blur-[60px] pointer-events-none" />
+
+      {/* Header */}
+      <div className="px-6 py-5 border-b border-slate-800 flex justify-between items-center bg-[#0f0f0f] relative z-10">
+        <div className="flex items-center gap-2.5">
+          <BrainCircuit className="w-4 h-4 text-indigo-400" />
+          <h3 className="font-bold text-white text-xs uppercase tracking-widest">AI Mission Control</h3>
+        </div>
+        <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-full flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" /> COORDINATING
         </span>
       </div>
       
-      <div className="space-y-4">
-        <div className="flex items-start gap-3">
-          <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-slate-800">Monitoring ER Capacity</p>
-            <p className="text-xs text-slate-500">Wait times optimal. No diversion needed.</p>
+      {/* Terminal Feed */}
+      <div className="p-6 space-y-6 flex-1 relative z-10 overflow-hidden">
+        
+        {/* Past Event */}
+        <div className="relative pl-5 border-l border-slate-800">
+          <div className="absolute w-2.5 h-2.5 rounded-full bg-slate-700 border-2 border-[#0a0a0a] -left-[5.5px] top-1" />
+          <div className="text-[10px] font-mono text-slate-500 mb-1.5 flex justify-between">
+            <span>REQ-992A</span>
+            <span>10:42:01 AM</span>
+          </div>
+          <p className="text-xs font-medium text-slate-300">Parsing emergency capacity metrics.</p>
+        </div>
+
+        {/* Action Taken */}
+        <div className="relative pl-5 border-l border-slate-800">
+          <div className="absolute w-2.5 h-2.5 rounded-full bg-indigo-500 border-2 border-[#0a0a0a] -left-[5.5px] top-1" />
+          <div className="text-[10px] font-mono text-indigo-400 mb-1.5 flex justify-between">
+            <span>DECISION_EXECUTED</span>
+            <span>10:42:05 AM</span>
+          </div>
+          <p className="text-xs font-medium text-white mb-2">Route patient PAT-1049 to General Ward B.</p>
+          <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3 text-[10px] text-indigo-200 font-mono leading-relaxed">
+            Reasoning: ICU full. Vitals stable.
+            <br />Action: Bed booked. Nurse notified.
           </div>
         </div>
-        <div className="flex items-start gap-3">
-          <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-slate-800">Reviewing Resource Availability</p>
-            <p className="text-xs text-slate-500">Evaluating critical stock across 4 wards.</p>
+
+        {/* Current Active Processing */}
+        <div className="relative pl-5 border-l border-teal-500/30">
+          <div className="absolute w-2.5 h-2.5 rounded-full bg-teal-400 border-2 border-[#0a0a0a] -left-[5.5px] top-1 shadow-[0_0_10px_rgba(45,212,191,0.8)] animate-pulse" />
+          <div className="text-[10px] font-mono text-teal-400 mb-1.5 flex justify-between">
+            <span>SYSTEM_SCAN</span>
+            <span>ACTIVE</span>
           </div>
+          <p className="text-xs font-medium text-white">Evaluating critical stock across 4 wards...</p>
         </div>
-        <div className="flex items-start gap-3">
-          <CheckCircle className="w-4 h-4 text-indigo-500 mt-0.5" />
-          <div>
-            <p className="text-sm font-semibold text-slate-800">Coordinating 3 Active Cases</p>
-            <p className="text-xs text-slate-500">Awaiting lab results for PAT-1049.</p>
-          </div>
-        </div>
+
       </div>
 
-      <div className="mt-auto pt-6">
-        <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 flex justify-between items-center">
-          <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">Overall Confidence</span>
-          <span className="text-sm font-black text-indigo-600">HIGH (98%)</span>
-        </div>
+      {/* Footer Metrics */}
+      <div className="px-6 py-4 border-t border-slate-800 bg-[#0f0f0f] flex justify-between items-center relative z-10">
+         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Model Confidence</span>
+         <span className="text-xs font-bold text-emerald-400 font-mono">98.4%</span>
       </div>
     </div>
   );
 }
 
-// ─── Main Dashboard Component ──────────────────────────────────────────
+// ─── Main Dashboard Component ───────────────────────────────────────────
 export default function HospitalAdminDashboard() {
   const navigate = useNavigate();
   const [isConnected, setIsConnected] = useState(() => getSocket()?.connected ?? false);
@@ -231,43 +227,41 @@ export default function HospitalAdminDashboard() {
 
   return (
     <Layout title="Operations Intelligence" subtitle="AI-driven hospital coordination">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto pb-10">
         
         {/* Row 1: Hospital Hero */}
         <HospitalHero stats={stats} isConnected={isConnected} />
 
-        {/* Row 2: Quick Action Cards */}
-        <div className="col-span-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <QuickActionCard icon={UserPlus} title="Register Patient" description="Intake a new patient and trigger AI." color="blue" onClick={() => navigate('/patients')} />
-          <QuickActionCard icon={AlertTriangle} title="Critical Cases" description="View patients needing immediate override." color="rose" onClick={() => navigate('/patients')} />
-          <QuickActionCard icon={Package} title="Resource Alert" description="Check stock and inventory levels." color="amber" onClick={() => navigate('/resources')} />
-          <QuickActionCard icon={Network} title="Mission Control" description="Watch live AI workflow traces." color="purple" onClick={() => navigate('/agent-activity')} />
+        {/* Row 2: Quick Action Command Bar */}
+        <div className="col-span-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <QuickActionCard icon={UserPlus} title="Register Patient" description="Intake & trigger AI." onClick={() => navigate('/patients')} />
+          <QuickActionCard icon={AlertTriangle} title="Critical Cases" description="Immediate overrides." onClick={() => navigate('/patients')} />
+          <QuickActionCard icon={Package} title="Resource Alert" description="Inventory & stock." onClick={() => navigate('/resources')} />
+          <QuickActionCard icon={Network} title="Mission Control" description="Live AI traces." onClick={() => navigate('/agent-activity')} />
         </div>
 
-        {/* Row 3: Department Capacity & AI Impact (Left 8 cols) | Current AI Activity (Right 4 cols) */}
+        {/* Row 3: Left (Capacity & Impact) | Right (Mission Control) */}
         <div className="col-span-12 lg:col-span-8 flex flex-col gap-6">
           
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <h3 className="font-bold text-slate-900 tracking-tight mb-5 text-sm uppercase">Department Capacity Map</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <DepartmentCard name="Intensive Care (ICU)" icon={Activity} occupied={icuOccupied} total={5} color="rose" />
-              <DepartmentCard name="Emergency Room" icon={AlertTriangle} occupied={Math.round(genTotal * 0.6)} total={genTotal} color="amber" />
-              <DepartmentCard name="General Ward" icon={Bed} occupied={genOccupied} total={genTotal} color="emerald" />
-              <DepartmentCard name="Cardiology" icon={HeartPulse} occupied={Math.round(genTotal * 0.3)} total={genTotal} color="blue" />
+          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+            <h3 className="font-bold text-slate-900 text-xs uppercase tracking-widest mb-6">Department Capacity</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-2">
+              <DepartmentCard name="Intensive Care (ICU)" icon={Activity} occupied={icuOccupied} total={5} />
+              <DepartmentCard name="Emergency Room" icon={AlertTriangle} occupied={Math.round(genTotal * 0.6)} total={genTotal} />
+              <DepartmentCard name="General Ward" icon={Bed} occupied={genOccupied} total={genTotal} />
+              <DepartmentCard name="Cardiology" icon={HeartPulse} occupied={Math.round(genTotal * 0.3)} total={genTotal} />
             </div>
           </div>
 
-          <div className="h-[250px]">
+          <div className="flex-1">
             <AIImpactWidget />
           </div>
 
         </div>
 
-        {/* Right 4 cols: Current AI Activity */}
-        <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-          <div className="flex-1">
-            <CurrentAIActivity />
-          </div>
+        {/* Right Column: Mission Control */}
+        <div className="col-span-12 lg:col-span-4 min-h-[500px]">
+          <MissionControl />
         </div>
 
       </div>
