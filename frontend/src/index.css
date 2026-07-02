@@ -1,52 +1,40 @@
 @import "tailwindcss";
 
 
-/* ─── Design Tokens (Modern Healthcare SaaS) ──────────────── */
+/* ─── Design Tokens ───────────────────────────────────────── */
 :root {
-  /* Slate Theme */
-  --color-brand-50:  #f8fafc;
-  --color-brand-100: #f1f5f9;
+  /* Brand */
+  --color-brand-50:  #eff6ff;
+  --color-brand-100: #dbeafe;
   --color-brand-400: #60a5fa;
   --color-brand-500: #3b82f6;
   --color-brand-600: #2563eb;
   --color-brand-700: #1d4ed8;
 
-  /* Secondary Accent (Teal) */
-  --color-secondary-500: #14b8a6;
+  /* Surfaces */
+  --color-bg:         #040713;
+  --color-surface:    #0c1124;
+  --color-surface-2:  #111827;
+  --color-surface-3:  #1a2236;
+  --color-border:     rgba(255,255,255,0.07);
+  --color-border-2:   rgba(255,255,255,0.12);
 
-  /* Surfaces (Light Workspace) */
-  --color-workspace-bg: #f8fafc; /* Soft Cloud */
-  --color-surface:    #ffffff; /* Pure White */
-  --color-surface-2:  #f1f5f9; /* Slate 100 */
-  --color-surface-3:  #e2e8f0; /* Slate 200 */
-  --color-border:     rgba(0,0,0,0.06);
-  --color-border-2:   rgba(0,0,0,0.12);
+  /* Text */
+  --color-text-primary:   #f1f5f9;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted:     #475569;
 
-  /* Shell (Dark Navigation) */
-  --color-sidebar-bg: #0f172a; /* Slate 900 */
-  --color-sidebar-surface: #1e293b; /* Slate 800 */
-  --color-sidebar-border: rgba(255,255,255,0.08);
-
-  /* Text (Light Workspace) */
-  --color-text-primary:   #0f172a; /* Near Black */
-  --color-text-secondary: #475569; /* Slate 600 */
-  --color-text-muted:     #64748b; /* Slate 500 */
-  
-  /* Text (Dark Shell) */
-  --color-sidebar-text: #f8fafc;
-  --color-sidebar-text-muted: #94a3b8;
-
-  /* Semantic Status */
-  --color-critical: #ef4444; /* Red 500 */
-  --color-high:     #f97316; /* Orange 500 */
-  --color-medium:   #f59e0b; /* Amber 500 */
-  --color-low:      #10b981; /* Emerald 500 */
-  --color-success:  #22c55e; /* Green 500 */
+  /* Status */
+  --color-critical: #ef4444;
+  --color-high:     #f97316;
+  --color-medium:   #eab308;
+  --color-low:      #22c55e;
+  --color-success:  #10b981;
   --color-warning:  #f59e0b;
   --color-info:     #3b82f6;
 
   /* Confidence */
-  --color-high-conf:   #22c55e;
+  --color-high-conf:   #10b981;
   --color-med-conf:    #f59e0b;
   --color-low-conf:    #ef4444;
 
@@ -76,7 +64,7 @@ html {
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--color-workspace-bg);
+  background-color: var(--color-bg);
   color: var(--color-text-primary);
   min-height: 100vh;
   line-height: 1.6;
@@ -106,14 +94,16 @@ a { color: var(--color-brand-400); text-decoration: none; }
 
 /* ─── Utilities ───────────────────────────────────────────── */
 .glass {
-  background: var(--color-surface);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--color-border);
 }
 
 .glass-heavy {
-  background: var(--color-surface);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  background: rgba(12, 17, 36, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--color-border-2);
 }
 
@@ -129,8 +119,8 @@ a { color: var(--color-brand-400); text-decoration: none; }
 }
 .card-hover:hover {
   border-color: var(--color-border-2);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
 
 /* ─── Priority Badges ────────────────────────────────────── */
@@ -210,7 +200,7 @@ a { color: var(--color-brand-400); text-decoration: none; }
 }
 
 .gradient-surface {
-  background: linear-gradient(180deg, var(--color-surface) 0%, var(--color-workspace-bg) 100%);
+  background: linear-gradient(180deg, var(--color-surface-2) 0%, var(--color-bg) 100%);
 }
 
 /* ─── Inputs ─────────────────────────────────────────────── */
@@ -315,8 +305,8 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
 
 /* ─── Sidebar ────────────────────────────────────────────── */
 .sidebar {
-  background: var(--color-sidebar-bg);
-  border-right: 1px solid var(--color-sidebar-border);
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -331,7 +321,7 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
 .sidebar-link {
   align-items: center;
   border-radius: var(--radius-md);
-  color: var(--color-sidebar-text-muted);
+  color: var(--color-text-secondary);
   display: flex;
   font-size: 0.875rem;
   font-weight: 500;
@@ -343,7 +333,7 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
 }
 .sidebar-link:hover {
   background: rgba(255,255,255,0.05);
-  color: var(--color-sidebar-text);
+  color: var(--color-text-primary);
 }
 .sidebar-link.active {
   background: rgba(59,130,246,0.12);
