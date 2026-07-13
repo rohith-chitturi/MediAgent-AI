@@ -131,11 +131,19 @@ export default function Resources() {
             {TYPE_CONFIG[t]?.icon} {t}
           </FilterBtn>
         ))}
-        <div style={{ width: 1, background: 'var(--color-border)', margin: '0 0.25rem' }} />
+        <div style={{ width: 1, height: '1.2rem', background: 'var(--color-border)', margin: '0 0.25rem' }} />
         <FilterBtn active={lowOnly} onClick={() => setLowOnly(!lowOnly)}>
           <TrendingDown size={13} style={{ display: 'inline', marginRight: 4 }} />
           Low Stock Only
         </FilterBtn>
+        {(typeFilter || lowOnly) && (
+          <button 
+            onClick={() => { setTypeFilter(''); setLowOnly(false); }}
+            style={{ marginLeft: 'auto', background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+          >
+            <X size={12} /> Clear Filters
+          </button>
+        )}
       </div>
 
       {/* Resource cards */}
@@ -149,7 +157,7 @@ export default function Resources() {
           {resources.map((r) => {
             const cfg = TYPE_CONFIG[r.type] ?? TYPE_CONFIG.EQUIPMENT;
             return (
-              <div key={r.id} className="card card-hover" style={{
+              <div key={r.id} className={`card card-hover ${r.isCritical ? 'pulse-critical' : ''}`} style={{
                 borderTop: `2px solid ${r.isCritical ? '#ef4444' : r.isLow ? '#f97316' : cfg.color}40`,
                 padding: '1.125rem',
               }}>
