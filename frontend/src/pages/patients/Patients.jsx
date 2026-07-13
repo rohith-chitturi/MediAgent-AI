@@ -202,16 +202,24 @@ export default function Patients() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <FilterBtn active={!statusFilter} onClick={() => { setStatusFilter(''); setPage(1); }}>All Status</FilterBtn>
         {['WAITING', 'TRIAGED', 'ADMITTED', 'DISCHARGED'].map((s) => (
           <FilterBtn key={s} active={statusFilter === s} onClick={() => { setStatusFilter(s); setPage(1); }}>{s}</FilterBtn>
         ))}
-        <div style={{ width: 1, background: 'var(--color-border)', margin: '0 0.25rem' }} />
+        <div style={{ width: 1, height: '1.2rem', background: 'var(--color-border)', margin: '0 0.25rem' }} />
         <FilterBtn active={!priorityFilter} onClick={() => { setPriorityFilter(''); setPage(1); }}>All Priority</FilterBtn>
         {['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map((p) => (
           <FilterBtn key={p} active={priorityFilter === p} onClick={() => { setPriorityFilter(p); setPage(1); }}>{p}</FilterBtn>
         ))}
+        {(search || statusFilter || priorityFilter) && (
+          <button 
+            onClick={() => { setSearch(''); setStatusFilter(''); setPriorityFilter(''); setPage(1); }}
+            style={{ marginLeft: 'auto', background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+          >
+            <X size={12} /> Clear Filters
+          </button>
+        )}
       </div>
 
       {/* Table */}
