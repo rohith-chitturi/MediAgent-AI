@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Stethoscope, CheckCircle, XCircle, Loader2, Building2 } from 'lucide-react';
+import { Stethoscope, CheckCircle, XCircle, Loader2, Building2, Search } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import { doctorsApi } from '../../services/modules';
 
@@ -108,6 +108,7 @@ export default function Doctors() {
   const qc = useQueryClient();
   const [deptFilter, setDeptFilter] = useState('');
   const [availFilter, setAvailFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: deptsData } = useQuery({
     queryKey: ['departments'],
@@ -115,8 +116,9 @@ export default function Doctors() {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ['doctors', deptFilter, availFilter],
+    queryKey: ['doctors', deptFilter, availFilter, searchQuery],
     queryFn: () => doctorsApi.list({
+      search: searchQuery || undefined,
       departmentId: deptFilter || undefined,
       isAvailable:  availFilter || undefined,
       limit: 50,
@@ -132,8 +134,19 @@ export default function Doctors() {
 
   return (
     <Layout title="Doctors" subtitle="Medical staff profiles & workload management">
-      {/* Filters */}
+      {/* Filters & Search */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', background: 'var(--color-surface-3)', border: '1px solid var(--color-border)', borderRadius: '7px', padding: '0.4rem 0.6rem' }}>
+          <Search size={14} color="var(--color-text-muted)" style={{ marginRight: '0.4rem' }} />
+          <input 
+            type="text" 
+            placeholder="Search doctors..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ background: 'transparent', border: 'none', color: 'var(--color-text)', fontSize: '0.8rem', outline: 'none', width: '140px', fontFamily: 'inherit' }}
+          />
+        </div>
+        <div style={{ width: 1, height: '1.2rem', background: 'var(--color-border)', margin: '0 0.25rem' }} />
         <FilterBtn active={!availFilter} onClick={() => setAvailFilter('')}>All</FilterBtn>
         <FilterBtn active={availFilter === 'true'} onClick={() => setAvailFilter('true')}>✓ Available</FilterBtn>
         <FilterBtn active={availFilter === 'false'} onClick={() => setAvailFilter('false')}>✗ Unavailable</FilterBtn>
