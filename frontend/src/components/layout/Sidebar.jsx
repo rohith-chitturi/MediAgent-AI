@@ -5,6 +5,7 @@ import {
   Settings, LogOut, Hospital, ChevronRight,
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
+import useNotificationStore from '../../store/notificationStore';
 import { disconnectSocket } from '../../services/socket';
 
 const getNavItems = (role, hasPermission) => {
@@ -50,7 +51,7 @@ const getAgentItems = (role, hasPermission) => {
   return items;
 };
 
-const NavGroup = ({ label, items }) => (
+const NavGroup = ({ label, items, unreadCount = 0 }) => (
   <div style={{ marginBottom: '0.5rem' }}>
     <p style={{
       color: 'var(--color-text-muted)',
@@ -62,13 +63,22 @@ const NavGroup = ({ label, items }) => (
     }}>
       {label}
     </p>
-    {items.map(({ to, label, icon: Icon }) => (
+    {items.map(({ to, label: itemLabel, icon: Icon }) => (
       <NavLink key={to} to={to} className={({ isActive }) =>
         `sidebar-link ${isActive ? 'active' : ''}`
       }>
         <Icon size={17} strokeWidth={1.75} />
-        <span style={{ flex: 1 }}>{label}</span>
-        <ChevronRight size={13} style={{ opacity: 0.3 }} />
+        <span style={{ flex: 1 }}>{itemLabel}</span>
+        {itemLabel === 'Notifications' && unreadCount > 0 ? (
+          <span style={{
+            background: '#ef4444', color: '#fff', fontSize: '0.65rem', fontWeight: 700,
+            padding: '2px 6px', borderRadius: '99px', marginLeft: 'auto'
+          }}>
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        ) : (
+          <ChevronRight size={13} style={{ opacity: 0.3 }} />
+        )}
       </NavLink>
     ))}
   </div>
@@ -76,6 +86,7 @@ const NavGroup = ({ label, items }) => (
 
 export default function Sidebar() {
   const { user, clearAuth, hasPermission } = useAuthStore();
+  const { unreadCount } = useNotificationStore();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -133,7 +144,7 @@ export default function Sidebar() {
       {/* Navigation */}
       <nav style={{ flex: 1, paddingTop: '0.5rem' }}>
         <NavGroup label={user?.role === 'SUPER_ADMIN' ? 'Platform' : 'Operations'} items={getNavItems(user?.role, hasPermission)} />
-        <NavGroup label={user?.role === 'SUPER_ADMIN' ? 'System' : 'AI Command'} items={getAgentItems(user?.role, hasPermission)} />
+        <NavGroup label={user?.role === 'SUPER_ADMIN' ? 'System' : 'AI Command'} items={getAgentItems(user?.role, hasPermission)} unreadCount={unreadCount} />
       </nav>
 
       {/* Bottom — User + Settings */}
