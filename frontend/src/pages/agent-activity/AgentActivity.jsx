@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { BrainCircuit, CheckCircle, Clock, AlertTriangle, ArrowRight, UserPlus, Bed, Stethoscope, Bell } from 'lucide-react';
+import { BrainCircuit, CheckCircle, Clock, AlertTriangle, ArrowRight, UserPlus, Bed, Stethoscope, Bell, Search } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import EmptyState from '../../components/ui/EmptyState';
 import { agentActivityApi } from '../../services/modules';
@@ -88,6 +88,7 @@ function WorkflowNode({ step, action, isLast, isActive }) {
 
 export default function AgentActivity() {
   const [selectedRunId, setSelectedRunId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { data: runsData, refetch } = useQuery({
     queryKey: ['agent-runs'],
@@ -96,6 +97,7 @@ export default function AgentActivity() {
   });
 
   const runs = runsData?.data || [];
+  const filteredRuns = runs.filter(run => run.displayRunId.toLowerCase().includes(searchTerm.toLowerCase()));
 
   useEffect(() => {
     const socket = getSocket();
@@ -129,12 +131,22 @@ export default function AgentActivity() {
               <Clock className="w-4 h-4 text-indigo-600" />
               Recent Workflows
             </h3>
+            <div className="mt-3 relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Search workflows..." 
+                className="w-full text-xs bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-2 outline-none focus:border-indigo-500 transition-all font-mono"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
           </div>
           <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-white">
-            {runs.length === 0 ? (
+            {filteredRuns.length === 0 ? (
               <p className="text-center text-sm text-slate-400 mt-10 font-medium">No workflows found.</p>
             ) : (
-              runs.map(run => (
+              filteredRuns.map(run => (
                 <button
                   key={run.id}
                   onClick={() => setSelectedRunId(run.id)}
