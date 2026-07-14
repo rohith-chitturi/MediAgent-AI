@@ -30,6 +30,9 @@ const create = async ({ patientId, doctorId, scheduledAt, notes }, hospitalId) =
   if (isNaN(apptDate.getTime())) {
     throw httpError('Invalid scheduledAt date — please provide a valid ISO date string.', 400);
   }
+  if (apptDate.getTime() < Date.now()) {
+    throw httpError('Appointments cannot be scheduled in the past.', 400);
+  }
 
   // Verify doctor belongs to this hospital
   const doctor = await prisma.doctor.findFirst({ where: { id: doctorId, user: { hospitalId } } });
