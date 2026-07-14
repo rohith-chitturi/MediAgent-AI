@@ -21,6 +21,14 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
+  if (err.code === 'P2003') {
+    return res.status(400).json({
+      success: false,
+      message: 'Operation failed due to a related record constraint. This record might be referenced elsewhere.',
+      field: err.meta?.field_name,
+    });
+  }
+
   // Validation errors from express-validator
   if (err.type === 'validation') {
     return res.status(422).json({
