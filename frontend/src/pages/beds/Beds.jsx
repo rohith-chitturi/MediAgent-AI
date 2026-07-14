@@ -138,12 +138,20 @@ export default function Beds() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <FilterBtn active={!typeFilter} onClick={() => setTypeFilter('')}>All Types</FilterBtn>
         {['ICU', 'EMERGENCY', 'GENERAL'].map((t) => <FilterBtn key={t} active={typeFilter === t} onClick={() => setTypeFilter(t)}>{t}</FilterBtn>)}
-        <div style={{ width: 1, background: 'var(--color-border)', margin: '0 0.25rem' }} />
+        <div style={{ width: 1, height: '1.2rem', background: 'var(--color-border)', margin: '0 0.25rem' }} />
         <FilterBtn active={!statusFilter} onClick={() => setStatusFilter('')}>All Status</FilterBtn>
         {['AVAILABLE', 'OCCUPIED', 'MAINTENANCE'].map((s) => <FilterBtn key={s} active={statusFilter === s} onClick={() => setStatusFilter(s)}>{s}</FilterBtn>)}
+        {(typeFilter || statusFilter) && (
+          <button 
+            onClick={() => { setTypeFilter(''); setStatusFilter(''); }}
+            style={{ marginLeft: 'auto', background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+          >
+            <X size={12} /> Clear Filters
+          </button>
+        )}
       </div>
 
       {/* Bed Grid */}
