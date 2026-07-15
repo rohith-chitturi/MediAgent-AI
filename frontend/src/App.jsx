@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrainCircuit, PhoneCall, Bell, Settings } from 'lucide-react';
+import { BrainCircuit, PhoneCall, Bell, Settings, Hospital, Users } from 'lucide-react';
 import useAuthStore from './store/authStore';
 
 // Pages
@@ -111,6 +111,16 @@ export default function App() {
           <Route path="/settings" element={
             <ProtectedRoute>
               <PlaceholderPage title="Settings" subtitle="Hospital & system configuration" icon={Settings} />
+            </ProtectedRoute>
+          } />
+          <Route path="/hospitals" element={
+            <ProtectedRoute>
+              <PlaceholderPage title="Hospitals" subtitle="Manage tenant hospitals (Phase 2)" icon={Hospital} />
+            </ProtectedRoute>
+          } />
+          <Route path="/users" element={
+            <ProtectedRoute>
+              <PlaceholderPage title="Users" subtitle="System user management (Phase 2)" icon={Users} />
             </ProtectedRoute>
           } />
 
