@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Stethoscope, CheckCircle, XCircle, Loader2, Building2, Search } from 'lucide-react';
+import { Stethoscope, CheckCircle, XCircle, X, Loader2, Building2, Search } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import { doctorsApi } from '../../services/modules';
 
@@ -157,6 +157,14 @@ export default function Doctors() {
             {d.name} ({d._count?.doctors ?? 0})
           </FilterBtn>
         ))}
+        {(searchQuery || availFilter || deptFilter) && (
+          <button 
+            onClick={() => { setSearchQuery(''); setAvailFilter(''); setDeptFilter(''); }}
+            style={{ marginLeft: 'auto', background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+          >
+            <X size={12} /> Clear Filters
+          </button>
+        )}
       </div>
 
       {isLoading ? (
