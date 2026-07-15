@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   Users, Stethoscope, Bed, Activity, BrainCircuit,
@@ -221,9 +222,14 @@ export default function Dashboard() {
               <BrainCircuit size={15} />
             </div>
             <h2 style={{ fontSize: '0.9rem', fontWeight: 600 }}>Agent Activity</h2>
-            <span style={{ marginLeft: 'auto', fontSize: '0.68rem', background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: '99px', color: '#c4b5fd', padding: '1px 7px', fontWeight: 600 }}>
-              AI AGENTS
-            </span>
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <Link to="/agent-activity" style={{ fontSize: '0.72rem', color: '#c4b5fd', textDecoration: 'none', fontWeight: 600, borderBottom: '1px solid rgba(196,181,253,0.3)', transition: 'border-color 0.2s' }}>
+                View All
+              </Link>
+              <span style={{ fontSize: '0.68rem', background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: '99px', color: '#c4b5fd', padding: '1px 7px', fontWeight: 600 }}>
+                AI AGENTS
+              </span>
+            </div>
           </div>
           <div style={{ flex: 1, overflowY: 'auto', maxHeight: '440px' }}>
             {agentFeed.length === 0 ? (
