@@ -3,6 +3,25 @@ const { publishEvent } = require('../../events/eventPublisher');
 const { EVENTS } = require('../../events/eventTypes');
 const { httpError } = require('../../utils/response');
 
+const triggerBedAssignedAgent = (hospitalId, bed) => {
+  const agentServiceUrl = process.env.AI_AGENT_SERVICE_URL || 'http://localhost:8000';
+  fetch(`${agentServiceUrl}/agents/run/background`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-agent-key': process.env.AI_AGENT_API_KEY || 'internal-key',
+    },
+    body: JSON.stringify({
+      event_type: 'bed.assigned',
+      hospital_id: hospitalId,
+      assigned_bed: bed,
+      resource_trigger: 'bed_assigned',
+    }),
+  }).catch((err) => {
+    console.error('[AgentTrigger] Failed to call bed assigned agent service:', err.message);
+  });
+};
+
 const list = async ({ hospitalId, type, status, ward, skip, limit }) => {
   const where = {
     hospitalId,
@@ -63,6 +82,10 @@ const assign = async (bedId, patientId, assignedBy, hospitalId) => {
   ]);
 
   await publishEvent(EVENTS.BED_ASSIGNED, hospitalId, { bedId, patientId, hospitalId });
+
+  // Trigger the AI agent to verify resources for this bed type
+  triggerBedAssignedAgent(hospitalId, bed);
+
   return assignment;
 };
 
