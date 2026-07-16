@@ -67,13 +67,20 @@ async def trigger_run(payload: RunRequest):
 # ─── POST /agents/run/background  (async — returns 202 immediately) 
 @router.post("/run/background", status_code=202, dependencies=[Depends(verify_agent_key)])
 async def trigger_run_background(payload: RunRequest):
-    from graph.mediagent_graph import run_patient_workflow
+    from graph.mediagent_graph import run_patient_workflow, run_resource_workflow
 
-    if not payload.patient:
-        raise HTTPException(status_code=400, detail="patient field required")
+    event = payload.event_type
 
-    asyncio.create_task(run_patient_workflow(payload.model_dump()))
-    return {"success": True, "message": "Agent workflow started in background"}
+    if event == "patient.registered":
+        if not payload.patient:
+            raise HTTPException(status_code=400, detail="patient field required for patient.registered")
+        asyncio.create_task(run_patient_workflow(payload.model_dump()))
+    elif event in ("bed.assigned", "resource.updated", "resource.scheduled"):
+        asyncio.create_task(run_resource_workflow(payload.model_dump()))
+    else:
+        raise HTTPException(status_code=400, detail=f"Unknown event_type: {event}")
+
+    return {"success": True, "message": f"Agent workflow started in background for {event}"}
 
 
 # ─── GET /agents/health ───────────────────────────────────────────
