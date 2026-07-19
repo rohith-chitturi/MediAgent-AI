@@ -1,5 +1,7 @@
 const prisma = require('../../config/db');
 const { emitToHospital } = require('../../socket/socketServer');
+const { publishEvent } = require('../../events/eventPublisher');
+const { EVENTS } = require('../../events/eventTypes');
 const logger = require('../../utils/logger');
 
 // ─── POST /api/internal/agent-action ─────────────────────────
@@ -154,10 +156,23 @@ const updatePatientInternal = async (req, res, next) => {
 const assignDoctorInternal = async (req, res, next) => {
   try {
     const { doctorId } = req.body;
-    const [patient] = await prisma.$transaction([
-      prisma.patient.update({ where: { id: req.params.id }, data: { doctorId } }),
+    
+    // Fetch patient first to get hospitalId (assuming patient exists)
+    const existingPatient = await prisma.patient.findUnique({ where: { id: req.params.id } });
+    if (!existingPatient) return res.status(404).json({ success: false, message: 'Patient not found' });
+    const hospitalId = existingPatient.hospitalId;
+
+    const [patient, doctor] = await prisma.$transaction([
+      prisma.patient.update({ where: { id: req.params.id }, data: { doctorId, status: 'TRIAGED' } }),
       prisma.doctor.update({ where: { id: doctorId }, data: { currentLoad: { increment: 1 } } }),
     ]);
+
+    await publishEvent(EVENTS.DOCTOR_ASSIGNED, hospitalId, { patientId: req.params.id, doctorId, hospitalId });
+    
+    if (doctor.currentLoad >= doctor.maxWorkload) {
+      await publishEvent(EVENTS.DOCTOR_OVERLOADED, hospitalId, { doctorId, hospitalId });
+    }
+
     res.json({ success: true, data: patient });
   } catch (err) { next(err); }
 };
