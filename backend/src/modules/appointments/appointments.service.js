@@ -1,5 +1,7 @@
 const prisma = require('../../config/db');
 const { httpError } = require('../../utils/response');
+const { publishEvent } = require('../../events/eventPublisher');
+const { EVENTS } = require('../../events/eventTypes');
 
 const list = async ({ hospitalId, doctorId, patientId, status, skip, limit }) => {
   const where = {
@@ -54,13 +56,16 @@ const create = async ({ patientId, doctorId, scheduledAt, notes }, hospitalId) =
   });
   if (conflict) throw httpError('Doctor has a conflicting appointment within 30 minutes.', 409);
 
-  return prisma.appointment.create({
+  const appointment = await prisma.appointment.create({
     data: { patientId, doctorId, scheduledAt: apptDate, notes },
     include: {
       patient: { select: { name: true, phone: true } },
       doctor:  { include: { user: { select: { name: true } }, department: { select: { name: true } } } },
     },
   });
+
+  await publishEvent(EVENTS.APPOINTMENT_SCHEDULED, hospitalId, appointment);
+  return appointment;
 };
 
 const updateStatus = async (id, hospitalId, status) => {
