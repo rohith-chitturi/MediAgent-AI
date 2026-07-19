@@ -112,8 +112,13 @@ const assignDoctor = async (patientId, doctorId, hospitalId) => {
     where: { id: patientId },
     data: { doctorId, status: 'TRIAGED' },
   });
-  await prisma.doctor.update({ where: { id: doctorId }, data: { currentLoad: { increment: 1 } } });
+  const doctor = await prisma.doctor.update({ where: { id: doctorId }, data: { currentLoad: { increment: 1 } } });
   await publishEvent(EVENTS.DOCTOR_ASSIGNED, hospitalId, { patientId, doctorId, hospitalId });
+  
+  if (doctor.currentLoad >= doctor.maxWorkload) {
+    await publishEvent(EVENTS.DOCTOR_OVERLOADED, hospitalId, { doctorId, hospitalId });
+  }
+
   return patient;
 };
 
