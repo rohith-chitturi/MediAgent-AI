@@ -11,6 +11,7 @@ router.post('/',            requirePermission('HOSPITAL_MANAGE'), ctrl.create);
 router.get('/workload',     requirePermission('PATIENT_VIEW_QUEUE'), ctrl.getWorkloadStats);
 router.get('/departments',  requirePermission('PATIENT_VIEW_QUEUE'), ctrl.getDepartments);
 router.get('/:id',          requirePermission('PATIENT_VIEW_QUEUE'), ctrl.getById);
+router.patch('/:id',        requirePermission('HOSPITAL_MANAGE'), ctrl.update);
 router.patch('/:id/toggle-availability', requirePermission('HOSPITAL_MANAGE'), ctrl.toggleAvailability);
 
 module.exports = router;

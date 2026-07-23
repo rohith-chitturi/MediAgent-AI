@@ -85,6 +85,36 @@ const getWorkloadStats = async (hospitalId) => {
   }));
 };
 
+const update = async (id, hospitalId, data) => {
+  const { name, phone, specialization, departmentId, maxWorkload, isAvailable } = data;
+  
+  const doctor = await getById(id, hospitalId);
+  
+  if (name || phone) {
+    await prisma.user.update({
+      where: { id: doctor.user.id },
+      data: {
+        ...(name && { name }),
+        ...(phone && { phone }),
+      }
+    });
+  }
+
+  if (specialization || departmentId || maxWorkload !== undefined || isAvailable !== undefined) {
+    await prisma.doctor.update({
+      where: { id },
+      data: {
+        ...(specialization && { specialization }),
+        ...(departmentId && { departmentId }),
+        ...(maxWorkload !== undefined && { maxWorkload }),
+        ...(isAvailable !== undefined && { isAvailable }),
+      }
+    });
+  }
+
+  return getById(id, hospitalId);
+};
+
 const create = async (data, hospitalId) => {
   const { name, email, phone, password, specialization, departmentId, maxWorkload, isAvailable } = data;
   
@@ -127,4 +157,4 @@ const create = async (data, hospitalId) => {
   return user.doctor;
 };
 
-module.exports = { list, getById, create, toggleAvailability, getDepartments, getWorkloadStats };
+module.exports = { list, getById, create, update, toggleAvailability, getDepartments, getWorkloadStats };
