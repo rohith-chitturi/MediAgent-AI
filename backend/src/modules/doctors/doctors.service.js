@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const prisma = require('../../config/db');
 const { httpError } = require('../../utils/response');
 
@@ -84,4 +85,46 @@ const getWorkloadStats = async (hospitalId) => {
   }));
 };
 
-module.exports = { list, getById, toggleAvailability, getDepartments, getWorkloadStats };
+const create = async (data, hospitalId) => {
+  const { name, email, phone, password, specialization, departmentId, maxWorkload, isAvailable } = data;
+  
+  if (!name || !email || !password || !specialization || !departmentId) {
+    throw httpError('Missing required fields (name, email, password, specialization, departmentId).', 400);
+  }
+
+  const role = await prisma.role.findUnique({ where: { name: 'DOCTOR' } });
+  if (!role) throw httpError('Doctor role not found in system.', 500);
+
+  const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+  if (existing) throw httpError('Email already registered.', 409);
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const user = await prisma.user.create({
+    data: {
+      hospitalId,
+      roleId: role.id,
+      name,
+      email: email.toLowerCase(),
+      phone,
+      passwordHash,
+      doctor: {
+        create: {
+          departmentId,
+          specialization,
+          maxWorkload: maxWorkload ?? 10,
+          isAvailable: isAvailable ?? true,
+        },
+      },
+    },
+    include: {
+      doctor: {
+        include: { department: { select: { name: true } } }
+      }
+    }
+  });
+
+  return user.doctor;
+};
+
+module.exports = { list, getById, create, toggleAvailability, getDepartments, getWorkloadStats };

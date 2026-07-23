@@ -22,6 +22,13 @@ const getById = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+const create = async (req, res, next) => {
+  try {
+    const doctor = await svc.create(req.body, req.hospitalId);
+    success(res, doctor, 201);
+  } catch (err) { next(err); }
+};
+
 const toggleAvailability = async (req, res, next) => {
   try {
     const doctor = await svc.toggleAvailability(req.params.id, req.hospitalId);
@@ -43,4 +50,4 @@ const getWorkloadStats = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { list, getById, toggleAvailability, getDepartments, getWorkloadStats };
+module.exports = { list, getById, create, toggleAvailability, getDepartments, getWorkloadStats };
