@@ -3,6 +3,25 @@ const { publishEvent } = require('../../events/eventPublisher');
 const { EVENTS } = require('../../events/eventTypes');
 const { httpError } = require('../../utils/response');
 
+const triggerResourceAgent = (hospitalId, resource, triggerEvent) => {
+  const agentServiceUrl = process.env.AI_AGENT_SERVICE_URL || 'http://localhost:8000';
+  fetch(`${agentServiceUrl}/agents/run/background`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-agent-key': process.env.AI_AGENT_API_KEY || 'internal-key',
+    },
+    body: JSON.stringify({
+      event_type: 'resource.updated',
+      hospital_id: hospitalId,
+      resource: resource,
+      resource_trigger: triggerEvent,
+    }),
+  }).catch((err) => {
+    console.error('[AgentTrigger] Failed to call resource agent service:', err.message);
+  });
+};
+
 const list = async ({ hospitalId, type, lowStock, skip, limit }) => {
   const where = {
     hospitalId,
@@ -54,6 +73,9 @@ const update = async (id, hospitalId, data) => {
     await publishEvent(EVENTS.RESOURCE_UPDATED, hospitalId, { resourceId: id, hospitalId });
   }
 
+  // Trigger the AI agent to evaluate stock
+  triggerResourceAgent(hospitalId, resource, 'resource_updated');
+
   return resource;
 };
 
@@ -67,6 +89,9 @@ const restock = async (id, hospitalId, quantity, notes) => {
   await publishEvent(EVENTS.RESOURCE_UPDATED, hospitalId, {
     resourceId: id, restocked: quantity, newQuantity: resource.quantity, hospitalId,
   });
+
+  // Trigger the AI agent to evaluate stock
+  triggerResourceAgent(hospitalId, resource, 'resource_restocked');
 
   return resource;
 };
