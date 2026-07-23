@@ -7,7 +7,7 @@ const router = Router();
 router.use(authenticate, scopeToHospital);
 
 router.get('/',             requirePermission('PATIENT_VIEW_QUEUE'), ctrl.list);
-router.post('/',            requirePermission('HOSPITAL_MANAGE'), (req, res) => res.status(501).json({ message: 'Not Implemented Yet' }));
+router.post('/',            requirePermission('HOSPITAL_MANAGE'), ctrl.create);
 router.get('/workload',     requirePermission('PATIENT_VIEW_QUEUE'), ctrl.getWorkloadStats);
 router.get('/departments',  requirePermission('PATIENT_VIEW_QUEUE'), ctrl.getDepartments);
 router.get('/:id',          requirePermission('PATIENT_VIEW_QUEUE'), ctrl.getById);
