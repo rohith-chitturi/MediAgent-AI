@@ -22,6 +22,13 @@ const getById = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+const update = async (req, res, next) => {
+  try {
+    const doctor = await svc.update(req.params.id, req.hospitalId, req.body);
+    success(res, doctor);
+  } catch (err) { next(err); }
+};
+
 const toggleAvailability = async (req, res, next) => {
   try {
     const doctor = await svc.toggleAvailability(req.params.id, req.hospitalId);
@@ -43,4 +50,4 @@ const getWorkloadStats = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { list, getById, toggleAvailability, getDepartments, getWorkloadStats };
+module.exports = { list, getById, update, toggleAvailability, getDepartments, getWorkloadStats };
