@@ -23,6 +23,7 @@ async def notification_agent(state: HospitalState) -> HospitalState:
     triage_d = state.get("triage_decision") or {}
     bed_d    = state.get("bed_decision")    or {}
     doctor_d = state.get("doctor_decision") or {}
+    discharge_d = state.get("discharge_decision") or {}
 
     priority    = state.get("assigned_priority")    or "UNKNOWN"
     department  = state.get("assigned_department")  or "—"
@@ -39,7 +40,12 @@ async def notification_agent(state: HospitalState) -> HospitalState:
     )
 
     # ── 1. Build notification content ─────────────────────────────
-    if patient:
+    if "DischargeAgent" in completed and patient:
+        title   = f"[{display_id}] {patient['name']} — Discharged"
+        message = discharge_d.get("decision_summary", "Patient discharged and summary generated.")
+        patient_id = patient["id"]
+        notif_type = "INFO"
+    elif patient:
         title   = f"[{display_id}] {patient['name']} — {priority}"
         message = (
             f"Priority: {priority} | Dept: {department} | "
@@ -100,6 +106,12 @@ async def notification_agent(state: HospitalState) -> HospitalState:
                     "done":       "DoctorAssignAgent" in completed,
                     "summary":    doctor_d.get("decision_summary", "—"),
                     "confidence": doctor_d.get("confidence_level", "—"),
+                },
+                {
+                    "agent":      "DischargeAgent",
+                    "done":       "DischargeAgent" in completed,
+                    "summary":    discharge_d.get("decision_summary", "—"),
+                    "confidence": discharge_d.get("confidence_level", "—"),
                 },
                 {
                     "agent":      "NotificationAgent",

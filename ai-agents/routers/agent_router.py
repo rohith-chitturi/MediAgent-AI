@@ -75,6 +75,11 @@ async def trigger_run_background(payload: RunRequest):
         if not payload.patient:
             raise HTTPException(status_code=400, detail="patient field required for patient.registered")
         asyncio.create_task(run_patient_workflow(payload.model_dump()))
+    elif event == "patient.discharged":
+        if not payload.patient:
+            raise HTTPException(status_code=400, detail="patient field required for patient.discharged")
+        from graph.mediagent_graph import run_discharge_workflow
+        asyncio.create_task(run_discharge_workflow(payload.model_dump()))
     elif event in ("bed.assigned", "resource.updated", "resource.scheduled"):
         asyncio.create_task(run_resource_workflow(payload.model_dump()))
     else:

@@ -96,6 +96,30 @@ const update = async (id, hospitalId, data) => {
   }
   if (data.status === 'DISCHARGED') {
     await publishEvent(EVENTS.PATIENT_DISCHARGED, hospitalId, { id, hospitalId });
+    
+    // Fire-and-forget: trigger AI discharge workflow
+    const agentServiceUrl = process.env.AI_AGENT_SERVICE_URL || 'http://localhost:8000';
+    fetch(`${agentServiceUrl}/agents/run/background`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-agent-key': process.env.AI_AGENT_API_KEY || 'internal-key',
+      },
+      body: JSON.stringify({
+        event_type:  'patient.discharged',
+        hospital_id: hospitalId,
+        patient: {
+          id:          patient.id,
+          name:        patient.name,
+          age:         patient.age,
+          gender:      patient.gender,
+          symptoms:    patient.symptoms,
+          priority:    patient.priority,
+          status:      patient.status,
+          hospital_id: hospitalId,
+        },
+      }),
+    }).catch(err => console.error('[AgentTrigger] Failed to call agent service for discharge:', err.message));
   }
 
   return patient;
