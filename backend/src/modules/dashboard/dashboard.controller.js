@@ -28,4 +28,18 @@ const getNotifications = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { getStats, getAgentActivity, getNotifications };
+const markAsRead = async (req, res, next) => {
+  try {
+    await svc.markAsRead(req.params.id, req.hospitalId, req.user.userId);
+    success(res, { message: 'Notification marked as read' });
+  } catch (err) { next(err); }
+};
+
+const markAllAsRead = async (req, res, next) => {
+  try {
+    await svc.markAllAsRead(req.hospitalId, req.user.userId);
+    success(res, { message: 'All notifications marked as read' });
+  } catch (err) { next(err); }
+};
+
+module.exports = { getStats, getAgentActivity, getNotifications, markAsRead, markAllAsRead };
