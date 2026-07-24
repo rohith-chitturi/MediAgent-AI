@@ -109,4 +109,28 @@ const getNotifications = async (hospitalId, userId, { unreadOnly, skip, limit })
   return { notifications, total };
 };
 
-module.exports = { getStats, getAgentActivity, getNotifications };
+const markAsRead = async (id, hospitalId, userId) => {
+  const where = {
+    id,
+    hospitalId,
+    ...(userId && { OR: [{ userId }, { userId: null }] })
+  };
+  return prisma.notification.updateMany({
+    where,
+    data: { isRead: true },
+  });
+};
+
+const markAllAsRead = async (hospitalId, userId) => {
+  const where = {
+    hospitalId,
+    isRead: false,
+    ...(userId && { OR: [{ userId }, { userId: null }] })
+  };
+  return prisma.notification.updateMany({
+    where,
+    data: { isRead: true },
+  });
+};
+
+module.exports = { getStats, getAgentActivity, getNotifications, markAsRead, markAllAsRead };
