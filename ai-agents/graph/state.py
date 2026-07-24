@@ -74,6 +74,7 @@ class HospitalState(TypedDict):
     bed_decision:          Optional[AgentDecision]
     doctor_decision:       Optional[AgentDecision]
     resource_decision:     Optional[AgentDecision]
+    discharge_decision:    Optional[AgentDecision]
     notification_decision: Optional[AgentDecision]
 
     # ── Notifications & calls ────────────────────────────────────
