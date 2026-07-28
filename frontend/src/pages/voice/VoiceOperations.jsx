@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  PhoneCall, PhoneForwarded, PhoneInTalk, PhoneOff, CheckCircle2,
+  PhoneCall, PhoneForwarded, PhoneOff, CheckCircle2,
   AlertTriangle, Clock, Search, Filter, Play, RefreshCw, X,
   User, Stethoscope, ShieldAlert, Sparkles, FileText, ChevronRight, Activity
 } from 'lucide-react';
@@ -166,7 +166,7 @@ export default function VoiceOperations() {
         {/* Metrics Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
           <StatCard title="Total Calls" value={stats.total} icon={PhoneCall} color="#3b82f6" />
-          <StatCard title="Active Calls" value={stats.active} icon={PhoneInTalk} color="#f59e0b" animate={stats.active > 0} />
+          <StatCard title="Active Calls" value={stats.active} icon={PhoneForwarded} color="#f59e0b" animate={stats.active > 0} />
           <StatCard title="Completed Calls" value={stats.completed} icon={CheckCircle2} color="#10b981" />
           <StatCard title="Escalations" value={stats.escalations} icon={AlertTriangle} color="#ef4444" badge={stats.escalations > 0 ? 'CRITICAL' : null} />
           <StatCard title="Success Rate" value={`${stats.successRate}%`} icon={Activity} color="#8b5cf6" />
