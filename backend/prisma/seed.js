@@ -216,20 +216,52 @@ async function main() {
   }
 
   // ─── Agent Memory (demo data for impressive demos) ───────────
-  console.log('Creating agent memory patterns...');
-  const memoryPatterns = [
-    { agentName: 'TriageAgent', memoryType: 'PATIENT_TREND', key: 'symptoms:chest_pain:frequency', value: { count: 23, avg_priority: 'HIGH', peak_hour: '14:00' } },
-    { agentName: 'BedAllocationAgent', memoryType: 'HOSPITAL_STATE', key: 'icu:avg_occupancy:weekly', value: { monday: 0.82, tuesday: 0.91, wednesday: 0.78, thursday: 0.95, friday: 0.88 } },
-    { agentName: 'ResourceAgent', memoryType: 'RESOURCE_PATTERN', key: 'oxygen:weekly_trend', value: { trend: 'declining', avg_daily_usage: 2.3, predicted_depletion_days: 5 } },
-    { agentName: 'DoctorAssignAgent', memoryType: 'DOCTOR_PREFERENCE', key: 'dept:cardiology:avg_load', value: { avg_load: 7.2, peak_load: 10, preferred_assignment: 'dr-sharma' } },
-    { agentName: 'ManagerAgent', memoryType: 'HOSPITAL_STATE', key: 'critical_events:monthly', value: { total: 14, resolved: 13, escalated: 1, avg_resolution_minutes: 8.4 } },
-  ];
-
-  for (const pattern of memoryPatterns) {
-    await prisma.agentMemory.upsert({
-      where: { hospitalId_agentName_key: { hospitalId: hospital1.id, agentName: pattern.agentName, key: pattern.key } },
-      update: { value: pattern.value },
-      create: { hospitalId: hospital1.id, ...pattern },
+  console.log('Creating enterprise agent memories...');
+  const memoryCount = await prisma.agentMemory.count({ where: { hospitalId: hospital1.id } });
+  if (memoryCount === 0) {
+    await prisma.agentMemory.createMany({
+      data: [
+        {
+          hospitalId: hospital1.id,
+          agentName: 'TriageAgent',
+          memoryCategory: 'CLINICAL_DECISION',
+          sourceWorkflow: 'patient.triage',
+          summary: 'Acute chest pain in cardiac patients correlates with 85% ICU bed allocation requirement.',
+          importanceScore: 0.9,
+          confidence: 0.95,
+          metadata: { count: 23, avg_priority: 'HIGH' }
+        },
+        {
+          hospitalId: hospital1.id,
+          agentName: 'BedAllocationAgent',
+          memoryCategory: 'RESOURCE_EVENT',
+          sourceWorkflow: 'bed.allocation',
+          summary: 'ICU occupancy reaches peak capacity on Thursday afternoons (avg 95% occupancy).',
+          importanceScore: 0.85,
+          confidence: 0.9,
+          metadata: { peak_day: 'Thursday', avg_occupancy: 0.95 }
+        },
+        {
+          hospitalId: hospital1.id,
+          agentName: 'ResourceAgent',
+          memoryCategory: 'RESOURCE_EVENT',
+          sourceWorkflow: 'resource.monitor',
+          summary: 'Oxygen cylinder reserve depletion velocity accelerates during weekend shifts.',
+          importanceScore: 0.8,
+          confidence: 0.88,
+          metadata: { resource: 'Oxygen', burn_rate: '2.3/day' }
+        },
+        {
+          hospitalId: hospital1.id,
+          agentName: 'DoctorAssignAgent',
+          memoryCategory: 'DOCTOR_ASSIGNMENT',
+          sourceWorkflow: 'doctor.assignment',
+          summary: 'Dr. Ananya Sharma has highest resolution rate for interventional cardiology admissions.',
+          importanceScore: 0.88,
+          confidence: 0.92,
+          metadata: { doctor: 'Dr. Ananya Sharma', workload: 3 }
+        }
+      ]
     });
   }
 
