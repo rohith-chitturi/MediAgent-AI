@@ -127,10 +127,11 @@ VAPI_API_KEY=your_vapi_private_key
 VAPI_PHONE_NUMBER_ID=your_vapi_phone_number_id
 ```
 
-#### 3. Database Migration
+#### 3. Database Migration & Seed
 ```bash
 cd backend
 npx prisma db push
+node prisma/seed.js
 ```
 
 #### 4. Run Services
@@ -139,12 +140,18 @@ npx prisma db push
 cd backend && npm run dev
 
 # Terminal 2: Python AI Service
-cd ai-agents && uvicorn main:app --reload --port 8000
+cd ai-agents && py -3.11 -m uvicorn main:app --reload --port 8000
 
 # Terminal 3: React Frontend
 cd frontend && npm run dev
 ```
 Access UI at `http://localhost:5173`.
+
+#### 🔑 Demo Login Credentials
+- **Super Admin**: `superadmin@mediagent.ai` / `password123`
+- **Hospital Admin**: `admin@cityhospital.com` / `password123`
+- **Doctor**: `dr.sharma@cityhospital.com` / `password123`
+- **Receptionist**: `reception@cityhospital.com` / `password123`
 
 ---
 
