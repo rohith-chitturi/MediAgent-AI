@@ -15,6 +15,7 @@ import CommandPalette from './components/ui/CommandPalette';
 import AgentActivity  from './pages/agent-activity/AgentActivity';
 import VoiceOperations from './pages/voice/VoiceOperations';
 import AgentMemoryDashboard from './pages/memory/AgentMemoryDashboard';
+import PredictiveAnalytics from './pages/predictive/PredictiveAnalytics';
 
 // Dashboards
 import HospitalAdminDashboard from './pages/dashboard/HospitalAdminDashboard';
@@ -108,6 +109,11 @@ export default function App() {
           <Route path="/agent-memory" element={
             <ProtectedRoute permission="AGENT_VIEW">
               <AgentMemoryDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/predictive-analytics" element={
+            <ProtectedRoute permission="AGENT_VIEW">
+              <PredictiveAnalytics />
             </ProtectedRoute>
           } />
           <Route path="/notifications" element={

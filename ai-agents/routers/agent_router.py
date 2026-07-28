@@ -141,14 +141,15 @@ async def resume_run(run_id: str, payload: ResumeRequest):
         logger.error(f"Failed to resume run {run_id}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ─── POST /agents/voice/analyze ──────────────────────────────────
-class AnalyzeRequest(BaseModel):
-    transcript: str
+# ─── POST /agents/predictive/run ──────────────────────────────────
+class PredictiveRequest(BaseModel):
+    hospitalId: str
+    telemetry: Dict[str, Any]
 
-@router.post("/voice/analyze", dependencies=[Depends(verify_agent_key)])
-async def analyze_voice_transcript(payload: AnalyzeRequest):
-    from graph.agents.voice_agent import analyze_transcript
-    result = await analyze_transcript(payload.transcript)
+@router.post("/predictive/run", dependencies=[Depends(verify_agent_key)])
+async def run_predictive_agent(payload: PredictiveRequest):
+    from graph.agents.predictive_agent import predictive_agent
+    result = await predictive_agent(payload.hospitalId, payload.telemetry)
     return result
 
 # ─── GET /agents/health ───────────────────────────────────────────
@@ -159,6 +160,6 @@ async def agent_health():
         "llm":    "gemini" if settings.GEMINI_API_KEY else "mock",
         "agents": [
             "TriageAgent", "BedAllocationAgent", "DoctorAssignAgent",
-            "ResourceAgent", "NotificationAgent", "VoiceAgent", "ApprovalAgent"
+            "ResourceAgent", "NotificationAgent", "VoiceAgent", "ApprovalAgent", "PredictiveAnalyticsAgent"
         ],
     }
