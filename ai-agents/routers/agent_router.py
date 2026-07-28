@@ -7,7 +7,7 @@ import logging
 import asyncio
 from fastapi import APIRouter, HTTPException, Depends, Header
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from config.settings import settings
 
