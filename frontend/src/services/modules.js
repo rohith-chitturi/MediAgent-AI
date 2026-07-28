@@ -64,3 +64,9 @@ export const predictiveApi = {
   getForecast: () => api.get('/predictive/forecast'),
   runForecast: () => api.post('/predictive/run'),
 };
+
+export const auditApi = {
+  list:      (params) => api.get('/audit', { params }),
+  analytics: ()       => api.get('/audit/analytics'),
+  exportCSV: ()       => api.get('/audit/export', { responseType: 'blob' }),
+};

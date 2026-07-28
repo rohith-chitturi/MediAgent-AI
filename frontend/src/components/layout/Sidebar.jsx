@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Stethoscope, Bed, Package,
   CalendarClock, BrainCircuit, PhoneCall, Bell,
-  Settings, LogOut, Hospital, ChevronRight, Brain, TrendingUp
+  Settings, LogOut, Hospital, ChevronRight, Brain, TrendingUp, ShieldCheck
 } from 'lucide-react';
 import useAuthStore from '../../store/authStore';
 import useNotificationStore from '../../store/notificationStore';
@@ -48,6 +48,7 @@ const getAgentItems = (role, hasPermission) => {
     items.push({ to: '/call-logs', label: 'Call Logs', icon: PhoneCall });
     items.push({ to: '/agent-memory', label: 'Agent Memory', icon: Brain });
     items.push({ to: '/predictive-analytics', label: 'Predictive AI', icon: TrendingUp });
+    items.push({ to: '/compliance', label: 'Governance & Audit', icon: ShieldCheck });
   }
   items.push({ to: '/notifications', label: 'Notifications', icon: Bell });
   return items;
