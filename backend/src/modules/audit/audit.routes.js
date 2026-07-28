@@ -1,11 +1,11 @@
 const { Router } = require('express');
 const ctrl = require('./audit.controller');
 const { requirePermission } = require('../../middleware/rbac.middleware');
-const authenticateJwt = require('../../middleware/auth.middleware');
+const { authenticate } = require('../../middleware/auth.middleware');
 
 const router = Router();
 
-router.use(authenticateJwt);
+router.use(authenticate);
 
 router.get('/', requirePermission('AGENT_VIEW'), ctrl.listAuditLogs);
 router.get('/analytics', requirePermission('AGENT_VIEW'), ctrl.getComplianceAnalytics);

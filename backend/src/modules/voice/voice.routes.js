@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const ctrl = require('./voice.controller');
 const { requirePermission } = require('../../middleware/rbac.middleware');
-const authenticateJwt = require('../../middleware/auth.middleware');
+const { authenticate } = require('../../middleware/auth.middleware');
 
 const router = Router();
 
@@ -9,7 +9,7 @@ const router = Router();
 router.post('/webhook', ctrl.handleVapiWebhook);
 
 // Protected RBAC endpoints
-router.use(authenticateJwt);
+router.use(authenticate);
 
 router.get('/calls', requirePermission('AGENT_VIEW'), ctrl.listCallLogs);
 router.get('/calls/:id', requirePermission('AGENT_VIEW'), ctrl.getCallLogDetails);
