@@ -88,6 +88,69 @@ async def trigger_run_background(payload: RunRequest):
     return {"success": True, "message": f"Agent workflow started in background for {event}"}
 
 
+# ─── POST /agents/run/{run_id}/resume ────────────────────────────
+class ResumeRequest(BaseModel):
+    action: str  # APPROVE, REJECT, ESCALATE
+    comment: str
+    userId: str
+    overrideConfig: Optional[dict] = None
+
+@router.post("/run/{run_id}/resume", dependencies=[Depends(verify_agent_key)])
+async def resume_run(run_id: str, payload: ResumeRequest):
+    from graph.mediagent_graph import get_patient_graph
+    import time
+    from services.backend_client import api_patch
+    
+    graph = await get_patient_graph()
+    config = {"configurable": {"thread_id": run_id}}
+    
+    state_snap = await graph.aget_state(config)
+    if not state_snap.next:
+        raise HTTPException(status_code=400, detail="No pending node to resume for this run.")
+
+    # We inject the human's response into the state by passing it as the command / state update
+    # In LangGraph 1.x, we can simply invoke with the state update we want to merge.
+    approval_context = {
+        "action": payload.action,
+        "comment": payload.comment,
+        "userId": payload.userId,
+        "overrideConfig": payload.overrideConfig or {}
+    }
+    
+    # We resume by invoking the graph with the state update
+    try:
+        # Run graph to completion in the background
+        async def run_resumed():
+            start_ms = int(time.time() * 1000)
+            final_state = await graph.ainvoke({"approval_context": approval_context}, config)
+            
+            workflow_status = "COMPLETED"
+            if final_state.get("errors"):
+                workflow_status = "PARTIAL"
+                
+            try:
+                await api_patch(f"/api/internal/agent-runs/{run_id}", {
+                    "workflowStatus": workflow_status,
+                })
+            except Exception as e:
+                logger.error(f"[{run_id}] Could not update AgentRun after resume: {e}")
+                
+        asyncio.create_task(run_resumed())
+        return {"success": True, "message": "Workflow resumed"}
+    except Exception as e:
+        logger.error(f"Failed to resume run {run_id}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ─── POST /agents/voice/analyze ──────────────────────────────────
+class AnalyzeRequest(BaseModel):
+    transcript: str
+
+@router.post("/voice/analyze", dependencies=[Depends(verify_agent_key)])
+async def analyze_voice_transcript(payload: AnalyzeRequest):
+    from graph.agents.voice_agent import analyze_transcript
+    result = await analyze_transcript(payload.transcript)
+    return result
+
 # ─── GET /agents/health ───────────────────────────────────────────
 @router.get("/health")
 async def agent_health():
@@ -96,6 +159,6 @@ async def agent_health():
         "llm":    "gemini" if settings.GEMINI_API_KEY else "mock",
         "agents": [
             "TriageAgent", "BedAllocationAgent", "DoctorAssignAgent",
-            "ResourceAgent", "NotificationAgent",
+            "ResourceAgent", "NotificationAgent", "VoiceAgent", "ApprovalAgent"
         ],
     }

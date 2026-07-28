@@ -28,6 +28,7 @@ model Hospital {
   agentMemories AgentMemory[]
   notifications Notification[]
   agentRuns     AgentRun[]
+  approvalRequests ApprovalRequest[]
 
   @@map("hospitals")
 }
@@ -66,6 +67,7 @@ model User {
   doctor        Doctor?
   notifications Notification[]
   auditLogs     AuditLog[]
+  resolvedApprovals ApprovalRequest[]
 
   @@index([hospitalId])
   @@index([email])
@@ -145,6 +147,7 @@ model Patient {
   appointments   Appointment[]
   resourceUsages ResourceUsage[]
   callLogs       CallLog[]
+  approvalRequests ApprovalRequest[]
 
   @@index([hospitalId])
   @@index([hospitalId, status])
@@ -298,6 +301,7 @@ model AgentRun {
 
   hospital Hospital      @relation(fields: [hospitalId], references: [id])
   actions  AgentAction[]
+  approvalRequests ApprovalRequest[]
 
   @@index([hospitalId, workflowStatus])
   @@index([hospitalId, startedAt(sort: Desc)])
@@ -320,10 +324,14 @@ model AgentAction {
   recommendedAction String?
   status            String           @default("PENDING")
   durationMs        Int?
+  version           Int              @default(1)
+  parentActionId    String?
   createdAt         DateTime         @default(now())
 
   hospital Hospital   @relation(fields: [hospitalId], references: [id])
   agentRun AgentRun?  @relation(fields: [agentRunId], references: [id])
+  parentAction AgentAction? @relation("ActionVersions", fields: [parentActionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  childActions AgentAction[] @relation("ActionVersions")
 
   @@index([hospitalId, agentName])
   @@index([hospitalId, createdAt(sort: Desc)])
@@ -331,6 +339,41 @@ model AgentAction {
   @@index([agentRunId])
   @@index([displayRunId])
   @@map("agent_actions")
+}
+
+// ─── APPROVAL WORKFLOWS ───────────────────────────────────────
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ESCALATED
+  TIMEOUT
+}
+
+model ApprovalRequest {
+  id               String         @id @default(cuid())
+  hospitalId       String
+  runId            String
+  patientId        String?
+  approvalType     String         // e.g., "ICU_ALLOCATION"
+  status           ApprovalStatus @default(PENDING)
+  requestedByAgent String
+  approvedBy       String?        // User ID
+  comment          String?
+  decisionBefore   Json?
+  decisionAfter    Json?
+  createdAt        DateTime       @default(now())
+  resolvedAt       DateTime?
+
+  hospital Hospital  @relation(fields: [hospitalId], references: [id])
+  run      AgentRun  @relation(fields: [runId], references: [id])
+  patient  Patient?  @relation(fields: [patientId], references: [id])
+  resolver User?     @relation(fields: [approvedBy], references: [id])
+
+  @@index([hospitalId, status])
+  @@index([runId])
+  @@map("approval_requests")
 }
 
 // ─── AGENT MEMORY (Future-ready — schema scaffolded) ──────────
@@ -375,23 +418,36 @@ enum CallStatus {
 }
 
 model CallLog {
-  id            String     @id @default(cuid())
-  patientId     String?
-  callType      CallType
-  calledTo      String
-  recipientName String
-  recipientRole String
-  status        CallStatus @default(INITIATED)
-  vapiCallId    String?    @unique
-  duration      Int?
-  transcript    String?
-  recordingUrl  String?
-  initiatedAt   DateTime   @default(now())
-  endedAt       DateTime?
+  id                   String     @id @default(cuid())
+  hospitalId           String?
+  patientId            String?
+  doctorId             String?
+  callType             CallType
+  calledTo             String
+  recipientName        String
+  recipientRole        String
+  status               CallStatus @default(INITIATED)
+  vapiCallId           String?    @unique
+  duration             Int?
+  transcript           String?
+  summary              String?
+  riskLevel            Priority?
+  sentiment            String?
+  medicationCompliance String?
+  symptomsMentioned    Json?
+  escalationRequired   Boolean    @default(false)
+  actionItems          Json?
+  outcome              String?
+  timeline             Json?      @default("[]")
+  recordingUrl         String?
+  initiatedAt          DateTime   @default(now())
+  endedAt              DateTime?
 
   patient Patient? @relation(fields: [patientId], references: [id])
 
+  @@index([hospitalId])
   @@index([patientId])
+  @@index([doctorId])
   @@map("call_logs")
 }
 

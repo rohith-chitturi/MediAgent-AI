@@ -14,6 +14,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage, HumanMessage
 
 from graph.state import HospitalState, AgentDecision, ConfidenceLevel
+from graph.policy_engine import ApprovalPolicyEngine
 from services.backend_client import api_post, api_patch
 from config.settings import settings
 
@@ -131,6 +132,8 @@ async def triage_agent(state: HospitalState) -> HospitalState:
         ),
         "confidence_level":   confidence.value,
         "recommended_action": triage_result["recommendedAction"],
+        "version": 1,
+        "parent_action_id": None
     }
 
     # ── 3. Persist AgentAction ────────────────────────────────────
@@ -163,11 +166,29 @@ async def triage_agent(state: HospitalState) -> HospitalState:
         logger.error(f"[{display_id}] Failed to update patient: {e}")
         update_errors.append(f"TriageAgent: {str(e)}")
 
-    return {
+    # ── 5. Evaluate Approval Policies ────────────────────────────
+    temp_state = {
         **state,
-        "triage_decision":    decision,
+        "assigned_priority": triage_result["priority"],
         "assigned_department": triage_result["department"],
-        "assigned_priority":  triage_result["priority"],
+    }
+    policy_result = ApprovalPolicyEngine.evaluate(temp_state)
+    
+    if policy_result:
+        approval_required = True
+        approval_reason = policy_result["reason"]
+        approval_type = policy_result["approval_type"]
+    else:
+        approval_required = False
+        approval_reason = None
+        approval_type = None
+
+    return {
+        **temp_state,
+        "triage_decision":    decision,
         "errors":             update_errors,
         "completed_nodes":    [*state.get("completed_nodes", []), "TriageAgent"],
+        "approval_required":  approval_required,
+        "approval_reason":    approval_reason,
+        "approval_type":      approval_type,
     }

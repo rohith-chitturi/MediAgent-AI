@@ -1,5 +1,6 @@
 const { Router } = require('express');
 const ctrl = require('./agents.controller');
+const activityCtrl = require('../agent-activity/agentActivity.controller');
 
 // Internal agent key middleware — FastAPI calls these, not the browser
 const agentKeyAuth = (req, res, next) => {
@@ -19,6 +20,7 @@ router.get('/agent-runs',           ctrl.listAgentRuns);
 
 // AgentAction log
 router.post('/agent-action',        ctrl.logAgentAction);
+router.post('/agent-activity/approval-request', activityCtrl.createApprovalRequest);
 
 // Notifications + Socket.io
 router.post('/notifications',       ctrl.createNotification);

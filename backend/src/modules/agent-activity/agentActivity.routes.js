@@ -10,5 +10,7 @@ router.use(scopeToHospital);
 
 // Required permission to view Agent Runs
 router.get('/runs', requirePermission('AGENT_RUN_VIEW'), ctrl.listAgentRuns);
+router.get('/approvals', requirePermission('AGENT_RUN_VIEW'), ctrl.listApprovalRequests);
+router.post('/runs/:id/review', requirePermission('AGENT_RUN_VIEW'), ctrl.reviewApprovalRequest);
 
 module.exports = router;

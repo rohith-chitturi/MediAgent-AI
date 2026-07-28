@@ -48,3 +48,9 @@ export const dashboardApi = {
 export const agentActivityApi = {
   listRuns: (params) => api.get('/agent-activity/runs', { params }),
 };
+
+export const voiceApi = {
+  listCalls:   (params) => api.get('/voice/calls', { params }),
+  getCall:     (id)     => api.get(`/voice/calls/${id}`),
+  triggerCall: (data)   => api.post('/voice/trigger', data),
+};
