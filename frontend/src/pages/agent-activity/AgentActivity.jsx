@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { BrainCircuit, CheckCircle, Clock, AlertTriangle, ArrowRight, UserPlus, Bed, Stethoscope, Bell, Search } from 'lucide-react';
+import { BrainCircuit, CheckCircle, Clock, AlertTriangle, ArrowRight, UserPlus, Bed, Stethoscope, Bell, Search, PhoneCall } from 'lucide-react';
 import Layout from '../../components/layout/Layout';
 import EmptyState from '../../components/ui/EmptyState';
 import { agentActivityApi } from '../../services/modules';
@@ -12,6 +12,7 @@ const WORKFLOW_STEPS = [
   { id: 'TriageAgent', label: 'Triage Agent', icon: BrainCircuit },
   { id: 'BedAllocationAgent', label: 'Bed Assigned', icon: Bed },
   { id: 'DoctorAssignAgent', label: 'Doctor Assigned', icon: Stethoscope },
+  { id: 'VoiceAgent', label: 'Voice Agent (Vapi)', icon: PhoneCall },
   { id: 'NotificationAgent', label: 'Notification Sent', icon: Bell }
 ];
 

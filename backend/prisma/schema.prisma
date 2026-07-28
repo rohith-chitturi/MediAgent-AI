@@ -440,6 +440,10 @@ model CallLog {
   outcome              String?
   timeline             Json?      @default("[]")
   recordingUrl         String?
+  retryCount           Int        @default(0)
+  maxRetries           Int        @default(2)
+  nextRetryAt          DateTime?
+  retryHistory         Json?      @default("[]")
   initiatedAt          DateTime   @default(now())
   endedAt              DateTime?
 
@@ -449,6 +453,22 @@ model CallLog {
   @@index([patientId])
   @@index([doctorId])
   @@map("call_logs")
+}
+
+model CallTemplate {
+  id           String   @id @default(cuid())
+  hospitalId   String?
+  callType     CallType
+  name         String
+  systemPrompt String
+  firstMessage String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([hospitalId])
+  @@index([callType])
+  @@map("call_templates")
 }
 
 // ─── NOTIFICATIONS ────────────────────────────────────────────

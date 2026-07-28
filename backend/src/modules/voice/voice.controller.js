@@ -5,7 +5,7 @@ const logger = require('../../utils/logger');
 const axios = require('axios');
 
 /**
- * Voice Controller
+ * Voice Controller with Analytics & Configurable Call Templates
  */
 
 // GET /api/voice/calls
@@ -42,7 +42,6 @@ const listCallLogs = async (req, res, next) => {
       prisma.callLog.count({ where })
     ]);
 
-    // Calculate aggregated metrics
     const stats = await getCallStats(hospitalId);
 
     res.json({
@@ -97,7 +96,6 @@ const triggerOutboundCall = async (req, res, next) => {
     let targetPhone = calledTo;
     let targetName = recipientName;
 
-    // Resolve patient if patientId provided
     if (patientId && (!targetPhone || !targetName)) {
       const patient = await prisma.patient.findUnique({ where: { id: patientId } });
       if (patient) {
@@ -106,7 +104,6 @@ const triggerOutboundCall = async (req, res, next) => {
       }
     }
 
-    // Resolve doctor if doctorId provided
     if (doctorId && (!targetPhone || !targetName)) {
       const doctor = await prisma.doctor.findUnique({
         where: { id: doctorId },
@@ -146,7 +143,39 @@ const triggerOutboundCall = async (req, res, next) => {
   }
 };
 
-// POST /api/voice/webhook (Live Vapi Webhook)
+// GET /api/voice/templates (Configurable Call Templates)
+const listCallTemplates = async (req, res, next) => {
+  try {
+    const hospitalId = req.user.hospitalId;
+    const templates = await prisma.callTemplate.findMany({
+      where: { hospitalId },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.json({ success: true, data: templates });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// POST /api/voice/templates
+const saveCallTemplate = async (req, res, next) => {
+  try {
+    const hospitalId = req.user.hospitalId;
+    const { callType, name, systemPrompt, firstMessage } = req.body;
+
+    const template = await prisma.callTemplate.upsert({
+      where: { id: req.body.id || 'new_id' },
+      update: { callType, name, systemPrompt, firstMessage },
+      create: { hospitalId, callType, name, systemPrompt, firstMessage }
+    });
+
+    res.json({ success: true, data: template });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// POST /api/voice/webhook
 const handleVapiWebhook = async (req, res, next) => {
   try {
     const { message } = req.body;
@@ -194,7 +223,6 @@ const handleVapiWebhook = async (req, res, next) => {
           }
         });
 
-        // Socket emit
         const hospitalId = message.call?.metadata?.hospitalId;
         if (hospitalId) {
           try {
@@ -208,12 +236,12 @@ const handleVapiWebhook = async (req, res, next) => {
     res.json({ success: true });
   } catch (err) {
     logger.error(`[VoiceWebhook] Error: ${err.message}`);
-    res.json({ success: true }); // Always 200 for Vapi
+    res.json({ success: true });
   }
 };
 
 /**
- * Calculates aggregated Voice Metrics for Dashboard
+ * Deep Voice Analytics Aggregator
  */
 async function getCallStats(hospitalId) {
   const [total, active, completed, missed, escalations, followups] = await Promise.all([
@@ -230,6 +258,32 @@ async function getCallStats(hospitalId) {
     _avg: { duration: true }
   });
 
+  // Calculate compliance trends & common symptoms
+  const completedLogs = await prisma.callLog.findMany({
+    where: { hospitalId, status: 'COMPLETED' },
+    select: { medicationCompliance: true, symptomsMentioned: true }
+  });
+
+  let compliantCount = 0;
+  let nonCompliantCount = 0;
+  const symptomMap = {};
+
+  completedLogs.forEach(log => {
+    if (log.medicationCompliance === 'COMPLIANT' || log.medicationCompliance === 'CONFIRMED') compliantCount++;
+    if (log.medicationCompliance === 'NON_COMPLIANT') nonCompliantCount++;
+
+    if (Array.isArray(log.symptomsMentioned)) {
+      log.symptomsMentioned.forEach(sym => {
+        symptomMap[sym] = (symptomMap[sym] || 0) + 1;
+      });
+    }
+  });
+
+  const topSymptoms = Object.entries(symptomMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([name, count]) => ({ name, count }));
+
   const successRate = total > 0 ? Math.round((completed / total) * 100) : 100;
   const avgDuration = Math.round(avgDurationResult._avg.duration || 42);
 
@@ -241,13 +295,15 @@ async function getCallStats(hospitalId) {
     escalations,
     followups,
     successRate,
-    avgDuration
+    avgDuration,
+    complianceTrends: {
+      compliant: compliantCount,
+      nonCompliant: nonCompliantCount
+    },
+    topSymptoms
   };
 }
 
-/**
- * Fallback Gemini analyzer for live webhooks
- */
 async function analyzeTranscriptWithGemini(transcript, fallbackSummary) {
   try {
     const pyUrl = `http://localhost:${process.env.PYTHON_PORT || 8000}/agents/voice/analyze`;
@@ -274,5 +330,7 @@ module.exports = {
   listCallLogs,
   getCallLogDetails,
   triggerOutboundCall,
+  listCallTemplates,
+  saveCallTemplate,
   handleVapiWebhook
 };
