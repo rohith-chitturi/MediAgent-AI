@@ -48,7 +48,7 @@ async def init_checkpointer():
             kwargs={"autocommit": True}
         )
         await _db_pool.open()
-        _checkpointer = AsyncPostgresSaver(_db_pool)
+        _checkpointer = AsyncPostgresSaver(_db_pool)  # type: ignore
         await _checkpointer.setup() # create checkpoint tables if not exist
         logger.info("✅ PostgresSaver checkpointer initialized")
     return _checkpointer
@@ -63,7 +63,7 @@ async def get_patient_graph():
     global _patient_graph
     if _patient_graph is None:
         chk = await init_checkpointer()
-        g = StateGraph(HospitalState)
+        g = StateGraph(HospitalState)  # type: ignore
         g.add_node("triage",       triage_agent)
         g.add_node("approval",     approval_agent)
         g.add_node("bed",          bed_agent)
@@ -87,7 +87,7 @@ async def get_patient_graph():
 def get_resource_graph():
     global _resource_graph
     if _resource_graph is None:
-        g = StateGraph(HospitalState)
+        g = StateGraph(HospitalState)  # type: ignore
         g.add_node("resource",     resource_agent)
         g.add_node("notification", notification_agent)
         g.set_entry_point("resource")
@@ -101,7 +101,7 @@ def get_resource_graph():
 def get_discharge_graph():
     global _discharge_graph
     if _discharge_graph is None:
-        g = StateGraph(HospitalState)
+        g = StateGraph(HospitalState)  # type: ignore
         g.add_node("discharge",    discharge_agent)
         g.add_node("voice",        voice_agent)
         g.add_node("notification", notification_agent)
