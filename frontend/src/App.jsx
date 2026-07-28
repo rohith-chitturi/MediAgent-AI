@@ -16,6 +16,7 @@ import AgentActivity  from './pages/agent-activity/AgentActivity';
 import VoiceOperations from './pages/voice/VoiceOperations';
 import AgentMemoryDashboard from './pages/memory/AgentMemoryDashboard';
 import PredictiveAnalytics from './pages/predictive/PredictiveAnalytics';
+import ComplianceDashboard from './pages/audit/ComplianceDashboard';
 
 // Dashboards
 import HospitalAdminDashboard from './pages/dashboard/HospitalAdminDashboard';
@@ -114,6 +115,11 @@ export default function App() {
           <Route path="/predictive-analytics" element={
             <ProtectedRoute permission="AGENT_VIEW">
               <PredictiveAnalytics />
+            </ProtectedRoute>
+          } />
+          <Route path="/compliance" element={
+            <ProtectedRoute permission="AGENT_VIEW">
+              <ComplianceDashboard />
             </ProtectedRoute>
           } />
           <Route path="/notifications" element={

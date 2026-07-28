@@ -517,19 +517,27 @@ model Notification {
 // ─── AUDIT LOG ────────────────────────────────────────────────
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  userId    String?
-  action    String
-  entity    String
-  entityId  String
-  before    Json?
-  after     Json?
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
+  id              String    @id @default(cuid())
+  hospitalId      String?
+  userId          String?
+  agentName       String?
+  action          String
+  entity          String
+  entityId        String
+  before          Json?
+  after           Json?
+  correlationId   String?   // e.g., "RUN-2026-000124"
+  outcome         String    @default("SUCCESS")
+  ipAddress       String?
+  userAgent       String?
+  isArchived      Boolean   @default(false)
+  retentionExpiry DateTime?
+  createdAt       DateTime  @default(now())
 
   user User? @relation(fields: [userId], references: [id])
 
+  @@index([hospitalId])
+  @@index([correlationId])
   @@index([entity, entityId])
   @@index([userId])
   @@index([createdAt(sort: Desc)])

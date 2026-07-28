@@ -19,6 +19,7 @@ const internalRoutes     = require('./modules/agents/agents.routes');
 const voiceRoutes        = require('./modules/voice/voice.routes');
 const memoryRoutes       = require('./modules/memory/memory.routes');
 const predictiveRoutes   = require('./modules/predictive/predictive.routes');
+const auditRoutes        = require('./modules/audit/audit.routes');
 
 const createApp = () => {
   const app = express();
@@ -68,6 +69,7 @@ const createApp = () => {
   app.use('/api/voice',         voiceRoutes);
   app.use('/api/memory',        memoryRoutes);
   app.use('/api/predictive',    predictiveRoutes);
+  app.use('/api/audit',         auditRoutes);
   app.use('/api/internal',     internalRoutes);   // FastAPI agent callbacks
 
   // ─── Error Handling ──────────────────────────────────────────
