@@ -1,6 +1,7 @@
 const { Router } = require('express');
 const ctrl = require('./agents.controller');
 const activityCtrl = require('../agent-activity/agentActivity.controller');
+const memoryCtrl = require('../memory/memory.controller');
 
 // Internal agent key middleware — FastAPI calls these, not the browser
 const agentKeyAuth = (req, res, next) => {
@@ -18,9 +19,12 @@ router.post('/agent-runs',          ctrl.createAgentRun);
 router.patch('/agent-runs/:id',     ctrl.updateAgentRun);
 router.get('/agent-runs',           ctrl.listAgentRuns);
 
-// AgentAction log
+// AgentAction log & Memory
 router.post('/agent-action',        ctrl.logAgentAction);
 router.post('/agent-activity/approval-request', activityCtrl.createApprovalRequest);
+router.post('/agent-memory',        memoryCtrl.createMemoryInternal);
+router.post('/agent-memory/query',  memoryCtrl.queryMemoriesInternal);
+router.post('/agent-memory/:id/touch', memoryCtrl.touchMemoryInternal);
 
 // Notifications + Socket.io
 router.post('/notifications',       ctrl.createNotification);

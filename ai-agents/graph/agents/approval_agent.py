@@ -2,6 +2,7 @@ import logging
 from typing import Any, Dict
 from graph.state import HospitalState, AgentDecision
 from services.backend_client import api_post
+from services.memory_service import store_memory
 
 logger = logging.getLogger("mediagent.approval_agent")
 
@@ -55,19 +56,28 @@ async def approval_agent(state: HospitalState) -> HospitalState:
         state["triage_decision"] = new_dec
         versions.append(new_dec)
         
-        # We also want to record this feedback into AgentMemory (Future task)
-        # For now, we fire a specialized event that feedback was received
+        # Record feedback & override into AgentMemory pgvector store
         try:
-            await api_post("/api/internal/agent-action", {
-                "hospitalId":        hospital_id,
-                "runId":             display_id,
-                "agentRunId":        run_uuid,
-                "agentName":         "HumanFeedback",
-                "actionType":        "FEEDBACK_LOGGED",
-                "targetType":        "SYSTEM",
-                "decisionSummary":   f"Doctor rejected AI recommendation: {comment}",
-                "confidenceLevel":   "HIGH",
-                "status":            "COMPLETED"
+            await store_memory(
+                hospital_id=hospital_id,
+                patient_id=state.get("patient", {}).get("id"),
+                agent_name="ApprovalAgent",
+                memory_category="HUMAN_OVERRIDE",
+                sourceWorkflow="human.approval.rejected",
+                summary=f"Doctor rejected AI triage decision for patient {state.get('patient', {}).get('name', 'Patient')}. Reason: {comment}",
+                metadata={
+                    "originalDecision": triage_dec,
+                    "overrideConfig": override_config,
+                    "approvedBy": user_id,
+                    "comment": comment
+                },
+                importance_score=1.0, # Overrides are extremely important
+                confidence=1.0
+            )
+            await api_post("/api/internal/emit", {
+                "hospitalId": hospital_id,
+                "event": "agent:feedback_logged",
+                "data": {"runId": display_id, "reason": comment}
             })
         except Exception as e:
             logger.error(f"[{display_id}] Failed to log Human Feedback action: {e}")

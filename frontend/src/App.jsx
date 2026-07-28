@@ -14,6 +14,7 @@ import PlaceholderPage from './pages/PlaceholderPage';
 import CommandPalette from './components/ui/CommandPalette';
 import AgentActivity  from './pages/agent-activity/AgentActivity';
 import VoiceOperations from './pages/voice/VoiceOperations';
+import AgentMemoryDashboard from './pages/memory/AgentMemoryDashboard';
 
 // Dashboards
 import HospitalAdminDashboard from './pages/dashboard/HospitalAdminDashboard';
@@ -102,6 +103,11 @@ export default function App() {
           <Route path="/call-logs" element={
             <ProtectedRoute permission="AGENT_VIEW">
               <VoiceOperations />
+            </ProtectedRoute>
+          } />
+          <Route path="/agent-memory" element={
+            <ProtectedRoute permission="AGENT_VIEW">
+              <AgentMemoryDashboard />
             </ProtectedRoute>
           } />
           <Route path="/notifications" element={

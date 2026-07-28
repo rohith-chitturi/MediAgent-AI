@@ -54,3 +54,8 @@ export const voiceApi = {
   getCall:     (id)     => api.get(`/voice/calls/${id}`),
   triggerCall: (data)   => api.post('/voice/trigger', data),
 };
+
+export const memoryApi = {
+  list:      (params) => api.get('/memory', { params }),
+  analytics: ()       => api.get('/memory/analytics'),
+};

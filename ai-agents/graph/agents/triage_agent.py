@@ -16,6 +16,7 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from graph.state import HospitalState, AgentDecision, ConfidenceLevel
 from graph.policy_engine import ApprovalPolicyEngine
 from services.backend_client import api_post, api_patch
+from services.memory_service import store_memory, retrieve_memories
 from config.settings import settings
 
 logger = logging.getLogger("mediagent.triage_agent")
@@ -87,6 +88,22 @@ async def triage_agent(state: HospitalState) -> HospitalState:
 
     logger.info(f"[{display_id}] TriageAgent → patient={patient['id']} symptoms={patient['symptoms'][:60]}")
 
+    # ── 0. Retrieve Agent Memory Context ─────────────────────────
+    retrieved_context = ""
+    try:
+        past_memories = await retrieve_memories(
+            hospital_id=hospital_id,
+            query=patient["symptoms"],
+            patient_id=patient["id"],
+            top_k=3
+        )
+        if past_memories:
+            history_lines = [f"- {m['summary']}" for m in past_memories]
+            retrieved_context = "\nHistorical Shared Memory Context:\n" + "\n".join(history_lines)
+            logger.info(f"[{display_id}] TriageAgent loaded {len(past_memories)} past memories")
+    except Exception as e:
+        logger.warning(f"[{display_id}] Failed to load memory context: {e}")
+
     # ── 1. Call Gemini (or mock) ─────────────────────────────────
     triage_result: Optional[dict] = None
 
@@ -103,6 +120,7 @@ async def triage_agent(state: HospitalState) -> HospitalState:
                     f"Patient: {patient['name']}, Age: {patient['age']}, "
                     f"Gender: {patient['gender']}\n"
                     f"Symptoms: {patient['symptoms']}"
+                    f"{retrieved_context}"
                 )),
             ]
             response = await llm.ainvoke(msgs)
@@ -166,7 +184,27 @@ async def triage_agent(state: HospitalState) -> HospitalState:
         logger.error(f"[{display_id}] Failed to update patient: {e}")
         update_errors.append(f"TriageAgent: {str(e)}")
 
-    # ── 5. Evaluate Approval Policies ────────────────────────────
+    # ── 5. Store New Agent Memory ────────────────────────────────
+    try:
+        await store_memory(
+            hospital_id=hospital_id,
+            patient_id=patient["id"],
+            agent_name="TriageAgent",
+            memory_category="CLINICAL_DECISION",
+            sourceWorkflow=state.get("event_type", "patient.registered"),
+            summary=f"Triaged patient {patient['name']} as {triage_result['priority']} for {triage_result['department']}. {decision['decision_summary']}",
+            metadata={
+                "priority": triage_result['priority'],
+                "department": triage_result['department'],
+                "confidence": confidence.value,
+                "symptoms": patient["symptoms"]
+            },
+            importance_score=0.9 if triage_result['priority'] == "CRITICAL" else 0.6
+        )
+    except Exception as e:
+        logger.error(f"[{display_id}] Failed to store TriageAgent memory: {e}")
+
+    # ── 6. Evaluate Approval Policies ────────────────────────────
     temp_state = {
         **state,
         "assigned_priority": triage_result["priority"],
