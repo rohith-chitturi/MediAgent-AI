@@ -31,6 +31,7 @@ const startServer = async () => {
     
     // Start Cron Jobs
     require('./jobs/approvalTimeout.job')();
+    require('./jobs/predictiveForecast.job')();
 
     // Listen
     httpServer.listen(PORT, () => {

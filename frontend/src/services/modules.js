@@ -59,3 +59,8 @@ export const memoryApi = {
   list:      (params) => api.get('/memory', { params }),
   analytics: ()       => api.get('/memory/analytics'),
 };
+
+export const predictiveApi = {
+  getForecast: () => api.get('/predictive/forecast'),
+  runForecast: () => api.post('/predictive/run'),
+};
