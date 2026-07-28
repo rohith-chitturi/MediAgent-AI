@@ -379,20 +379,28 @@ model ApprovalRequest {
 // ─── AGENT MEMORY (Future-ready — schema scaffolded) ──────────
 
 model AgentMemory {
-  id         String    @id @default(cuid())
-  hospitalId String
-  agentName  String
-  memoryType String
-  key        String
-  value      Json
-  expiresAt  DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  hospitalId      String
+  patientId       String?
+  agentName       String
+  memoryCategory  String    // PATIENT_HISTORY, CLINICAL_DECISION, VOICE_CONVERSATION, DOCTOR_ASSIGNMENT, RESOURCE_EVENT, HUMAN_OVERRIDE, AI_FEEDBACK, WORKFLOW_OUTCOME
+  sourceWorkflow  String?
+  summary         String
+  metadata        Json      @default("{}")
+  vectorData      Json?     @default("[]")
+  confidence      Float?    @default(0.9)
+  importanceScore Float?    @default(0.5)
+  retrievalCount  Int       @default(0)
+  lastRetrievedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   hospital Hospital @relation(fields: [hospitalId], references: [id])
 
-  @@unique([hospitalId, agentName, key])
-  @@index([hospitalId, agentName, memoryType])
+  @@index([hospitalId, memoryCategory])
+  @@index([hospitalId, agentName])
+  @@index([hospitalId, patientId])
+  @@index([hospitalId, createdAt(sort: Desc)])
   @@map("agent_memories")
 }
 
