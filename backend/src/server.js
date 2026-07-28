@@ -28,6 +28,9 @@ const startServer = async () => {
 
     // Attach Socket.io
     initSocket(httpServer);
+    
+    // Start Cron Jobs
+    require('./jobs/approvalTimeout.job')();
 
     // Listen
     httpServer.listen(PORT, () => {

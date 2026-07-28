@@ -13,6 +13,7 @@ import Appointments   from './pages/appointments/Appointments';
 import PlaceholderPage from './pages/PlaceholderPage';
 import CommandPalette from './components/ui/CommandPalette';
 import AgentActivity  from './pages/agent-activity/AgentActivity';
+import VoiceOperations from './pages/voice/VoiceOperations';
 
 // Dashboards
 import HospitalAdminDashboard from './pages/dashboard/HospitalAdminDashboard';
@@ -100,7 +101,7 @@ export default function App() {
           } />
           <Route path="/call-logs" element={
             <ProtectedRoute permission="AGENT_VIEW">
-              <PlaceholderPage title="Call Logs" subtitle="Vapi voice call history" icon={PhoneCall} />
+              <VoiceOperations />
             </ProtectedRoute>
           } />
           <Route path="/notifications" element={

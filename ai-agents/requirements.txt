@@ -8,8 +8,11 @@ pydantic>=2.7.4,<3.0.0
 pydantic-settings==2.6.1
 python-dotenv==1.0.1
 
-# LangGraph 1.x (pre-built wheels, stable API)
-langgraph>=1.0.0,<2.0.0
+# LangGraph (pre-built wheels, stable API)
+langgraph
+langgraph-checkpoint-postgres
+psycopg[binary]
+psycopg-pool
 
 # LangChain Google Gemini (must be compatible with langchain-core>=1.4.0 pulled by langgraph 1.x)
 langchain-google-genai>=2.1.0,<3.0.0

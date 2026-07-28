@@ -18,7 +18,7 @@ class ConfidenceLevel(str, Enum):
         return ConfidenceLevel.LOW
 
 
-class AgentDecision(TypedDict):
+class AgentDecision(TypedDict, total=False):
     """
     Standard structured output contract for every agent node.
     Raw LLM chain-of-thought is processed internally and NEVER stored.
@@ -26,9 +26,11 @@ class AgentDecision(TypedDict):
     decision_summary:   str             # Plain-English admin-friendly summary
     confidence_level:   str             # ConfidenceLevel enum value
     recommended_action: str             # Concrete next step
+    version:            Optional[int]   # Version of the decision (e.g. 1 for AI, 2 for manual override)
+    parent_action_id:   Optional[str]   # For tracing override history
 
 
-class PatientContext(TypedDict):
+class PatientContext(TypedDict, total=False):
     id:               str
     name:             str
     age:              int
@@ -39,7 +41,7 @@ class PatientContext(TypedDict):
     hospital_id:      str
 
 
-class ResourceContext(TypedDict):
+class ResourceContext(TypedDict, total=False):
     id:          str
     name:        str
     type:        str
@@ -49,7 +51,7 @@ class ResourceContext(TypedDict):
     hospital_id: str
 
 
-class HospitalState(TypedDict):
+class HospitalState(TypedDict, total=False):
     """
     LangGraph shared state passed between all agent nodes.
     Every field is Optional so nodes can be run independently.
@@ -76,6 +78,16 @@ class HospitalState(TypedDict):
     resource_decision:     Optional[AgentDecision]
     discharge_decision:    Optional[AgentDecision]
     notification_decision: Optional[AgentDecision]
+    
+    # ── Version History for Audit ────────────────────────────────
+    decision_versions:     List[AgentDecision]
+
+    # ── Approvals & Interrupts ───────────────────────────────────
+    approval_requests:     List[Dict[str, Any]] # Stores pending/resolved approval data
+    approval_required:     Optional[bool]
+    approval_reason:       Optional[str]
+    approval_type:         Optional[str]
+    approval_context:      Optional[Dict[str, Any]] # Manual override inputs (e.g. action, comment, new decisions)
 
     # ── Notifications & calls ────────────────────────────────────
     notifications_sent: List[Dict[str, Any]]
